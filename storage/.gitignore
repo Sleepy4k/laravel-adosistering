@@ -1,0 +1,8 @@
+*
+!app/
+!docker/
+!logs/
+!framework/
+!backups/
+!uploader/
+!.gitignore
