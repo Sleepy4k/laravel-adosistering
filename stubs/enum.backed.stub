@@ -2,7 +2,11 @@
 
 namespace {{ namespace }};
 
+use App\Foundations\Enum;
+
 enum {{ class }}: {{ type }}
 {
-    //
+    use Enum;
+
+    // Case section started
 }

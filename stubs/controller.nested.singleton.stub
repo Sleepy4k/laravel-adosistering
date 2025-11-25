@@ -3,7 +3,7 @@
 namespace {{ namespace }};
 
 use {{ namespacedModel }};
-use {{ rootNamespace }}Http\Controllers\Controller;
+use App\Foundations\Controller;
 use Illuminate\Http\Request;
 use {{ namespacedParentModel }};
 

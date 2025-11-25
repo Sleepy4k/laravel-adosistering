@@ -25,9 +25,9 @@ class {{ class }}
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can store models.
      */
-    public function create({{ user }} $user): bool
+    public function store({{ user }} $user): bool
     {
         return false;
     }
@@ -44,22 +44,6 @@ class {{ class }}
      * Determine whether the user can delete the model.
      */
     public function delete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
     {
         return false;
     }
