@@ -1,11 +1,400 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  /* Primary Colors */
+  --color-primary: #67B744;
+  --color-primary-dark: #186D3C;
+  --color-primary-light: rgba(103, 183, 68, 0.2);
+  --color-primary-hover: #5fa83c;
+  --color-primary-darker: #467A30;
 }
+
+@layer base {
+  /* Global Reset */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    line-height: 1.5;
+    min-height: 100vh;
+    font-family: "Test Founders Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #ffffff;
+    color: #111111;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+}
+
+@layer components {
+
+  /* Utility classes untuk warna theme */
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  
+  .bg-primary-hover {
+    background-color: var(--color-primary-hover);
+  }
+  
+  .bg-primary-dark {
+    background-color: var(--color-primary-dark);
+  }
+  
+  .bg-primary-darker {
+    background-color: var(--color-primary-darker);
+  }
+  
+  .text-primary-color {
+    color: var(--color-primary);
+  }
+  
+  .text-primary-dark {
+    color: var(--color-primary-dark);
+  }
+  
+  .text-primary-darker {
+    color: var(--color-primary-darker);
+  }
+  
+  .text-primary-hover {
+    color: var(--color-primary-hover);
+  }
+  
+  /* Utility classes untuk warna umum yang sering dipakai */
+  .text-muted-dark {
+    color: #4F4F4F;
+  }
+  
+  .text-muted-gray {
+    color: #808080;
+  }
+  
+  .border-light-gray {
+    border-color: #C2C2C2;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  textarea,
+  select {
+    @apply w-full h-[52px] rounded-xl px-4 py-3;
+    @apply bg-white text-gray-900 text-base;
+    @apply border border-gray-300;
+    @apply transition-all duration-200;
+    @apply placeholder:text-gray-400;
+    @apply outline-none;
+  }
+
+  input[type="text"]:hover:not(:disabled):not(:focus),
+  input[type="password"]:hover:not(:disabled):not(:focus),
+  input[type="email"]:hover:not(:disabled):not(:focus),
+  textarea:hover:not(:disabled):not(:focus),
+  select:hover:not(:disabled):not(:focus) {
+    @apply border-gray-400;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  input[type="email"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--color-primary-dark);
+    @apply outline-none;
+    box-shadow: none;
+  }
+
+  /* 4. FILLED STATE (Has value) */
+  input[type="text"]:not(:placeholder-shown),
+  input[type="password"]:not(:placeholder-shown),
+  input[type="email"]:not(:placeholder-shown),
+  textarea:not(:placeholder-shown) {
+    @apply text-gray-900;
+  }
+
+  /* 5. ERROR STATE (Unfilled) */
+  input.border-red-500:not(:focus),
+  input[type="text"].border-red-500:not(:focus),
+  input[type="password"].border-red-500:not(:focus),
+  input[type="email"].border-red-500:not(:focus),
+  textarea.border-red-500:not(:focus) {
+    @apply border-red-500;
+  }
+
+  /* 6. ERROR STATE (Focus) */
+  input.border-red-500:focus,
+  input[type="text"].border-red-500:focus,
+  input[type="password"].border-red-500:focus,
+  input[type="email"].border-red-500:focus,
+  textarea.border-red-500:focus {
+    @apply border-red-500;
+    @apply outline-none;
+    box-shadow: none;
+  }
+
+  /* 7. ERROR STATE (Hover) */
+  input.border-red-500:hover:not(:focus),
+  input[type="text"].border-red-500:hover:not(:focus),
+  input[type="password"].border-red-500:hover:not(:focus),
+  input[type="email"].border-red-500:hover:not(:focus),
+  textarea.border-red-500:hover:not(:focus) {
+    @apply border-red-600;
+  }
+
+  /* 8. DISABLED STATE */
+  input:disabled,
+  input[type="text"]:disabled,
+  input[type="password"]:disabled,
+  input[type="email"]:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply bg-gray-100 text-gray-500;
+    @apply border-gray-200;
+    @apply cursor-not-allowed;
+    @apply opacity-60;
+  }
+
+  /* Default Label */
+  label {
+    @apply text-sm font-medium text-gray-700;
+    @apply block mb-2;
+  }
+
+  /* Mandatory Indicator (Red Asterisk) */
+  label .required,
+  label .mandatory {
+    @apply text-red-500;
+  }
+
+  /* Disabled Label */
+  label:has(+ input:disabled),
+  label:has(+ textarea:disabled),
+  label:has(+ select:disabled) {
+    @apply text-gray-500;
+  }
+
+  /* Hint Message (Gray) */
+  .hint-message,
+  .input-hint {
+    @apply text-xs text-gray-500;
+    @apply mt-1.5;
+  }
+
+  /* Error Message (Red) */
+  .error-message,
+  .input-error-message {
+    @apply text-xs text-red-500;
+    @apply mt-1.5;
+  }
+
+  /* Input Group Container */
+  .input-group,
+  .form-group {
+    @apply flex flex-col gap-2;
+    @apply w-full;
+  }
+}
+
+:root {
+  /* Surface colors */
+  --color-surface-page: #ffffff;
+  --color-surface-header: #2f3336;
+  --color-surface-card: #ffffff;
+  
+  /* Border colors */
+  --color-border-subtle: #e5e5e5;
+  
+  /* Text colors */
+  --color-text-primary: #111111;
+  --color-text-muted: #6b6b6b;
+  --color-text-inverse: #ffffff;
+  
+  /* Link colors */
+  --color-link: #2563eb;
+  --color-link-hover: #1d4ed8;
+  
+  /* Focus colors */
+  --color-focus-border: var(--color-primary-dark);
+  --color-focus-ring: var(--color-primary-light);
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Layout constraints */
+  --layout-max-width: 1200px;
+  --header-height: 64px;
+  --footer-height: 80px;
+}
+
+h1 {
+  font-size: 80px;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 56px;
+  line-height: 1.1;
+}
+
+h3 {
+  font-size: 44px;
+  line-height: 1.2;
+}
+
+h4 {
+  font-size: 36px;
+  line-height: 1.2;
+}
+
+h5 {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+h6 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-inverse {
+  color: var(--color-text-inverse);
+}
+
+  /* ========================================================================
+     3D STYLE BUTTONS - Pixel Perfect Implementation
+     ======================================================================== */
+
+  /* Green Button - Nyalakan Semua Pompa */
+  .btn-3d-green {
+    background-color: var(--color-primary);
+    border: 1px solid #467A30;
+    box-shadow:
+      0px 0px 1px 2px rgba(55, 107, 33, 0.2), /* Drop Shadow: X:0 Y:0 Blur:1 Spread:2 #376B21 20% */
+      inset 0px 0px 2px 0px #6EC610,           /* Inner Shadow 1: X:0 Y:0 Blur:0 Spread:2 #6EC610 */
+      inset 0px -2px 0px 0px var(--color-primary-dark);          /* Inner Shadow 2: X:0 Y:-2 Blur:2 Spread:0 #186D3C */
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem; 
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .btn-3d-green:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .btn-3d-green:active {
+    transform: scale(0.95);
+  }
+
+  /* Red Button - Matikan Semua Pompa */
+  .btn-3d-red {
+    background-color: #DD1D3A;
+    border: 1px solid #C0132D;
+    box-shadow:
+      0px 0px 1px 2px rgba(157, 0, 24, 0.2),  /* Drop Shadow: X:0 Y:0 Blur:1 Spread:2 #9D0018 20% */
+      inset 0px 0px 2px 0px #ED667A,           /* Inner Shadow 1: X:0 Y:0 Blur:0 Spread:2 #ED667A */
+      inset 0px -2px 0px 0px #280006;          /* Inner Shadow 2: X:0 Y:-2 Blur:2 Spread:0 #280006 */
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .btn-3d-red:hover {
+    background-color: #c41a33;
+  }
+
+  .btn-3d-red:active {
+    transform: scale(0.95);
+  }
+
+  /* ========================================================================
+     CUSTOM CHECKBOX - Green Theme
+     ======================================================================== */
+
+  /* Custom checkbox untuk IoT sensor card */
+  .checkbox-green {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-primary);
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .checkbox-green:hover {
+    border-color: var(--color-primary-hover);
+  }
+
+  .checkbox-green:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .checkbox-green:checked::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .checkbox-green:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+  }
+
+  .checkbox-green:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
