@@ -1,4 +1,4 @@
-<x-auth-card
+<x-auth.login-card
     title="Login Akun"
     :action="route('admin.login')"
     :background-image="asset('assets/images/auth/bg-login-admin.jpg')"

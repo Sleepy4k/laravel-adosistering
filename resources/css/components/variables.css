@@ -1,0 +1,38 @@
+
+
+:root {
+  --color-surface-page: #ffffff;
+  --color-surface-header: #2f3336;
+  --color-surface-card: #ffffff;
+  --color-border-subtle: #e5e5e5;
+  --color-border-default: #D1D5DB;
+  --color-border-hover: #9CA3AF;
+  --color-text-primary: #111111;
+  --color-text-muted: #6b6b6b;
+  --color-text-inverse: #ffffff;
+  --color-text-green: #4F8936;
+  --color-link: #2563eb;
+  --color-link-hover: #1d4ed8;
+  --color-focus-border: var(--color-primary-dark);
+  --color-focus-ring: var(--color-primary-light);
+  --color-error: #E47689;
+  --color-error-hover: #D9405E;
+  --spacing-xs: 0.5rem;   /* 8px */
+  --spacing-sm: 1rem;     /* 16px */
+  --spacing-md: 1.5rem;   /* 24px */
+  --spacing-lg: 2rem;     /* 32px */
+  --spacing-xl: 3rem;     /* 48px */
+  --layout-max-width: 1200px;
+  --header-height: 64px;
+  --footer-height: 80px;
+  --input-height: 49px;
+  --input-radius: 16px;
+  --input-padding-x: 16px;
+  --input-padding-y: 12px;
+  --input-font-size: 16px;
+  --btn-radius: 8px;
+  --btn-transition: 0.1s ease-in-out;
+  --checkbox-size: 24px;
+  --checkbox-radius: 8px;
+  --checkbox-border-width: 2px;
+}

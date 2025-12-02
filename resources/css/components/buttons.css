@@ -1,0 +1,44 @@
+@layer components {
+  .btn-3d-green {
+    background-color: var(--color-primary);
+    border: 1px solid #467A30;
+    box-shadow:
+      0px 0px 1px 2px rgba(55, 107, 33, 0.2),
+      inset 0px 0px 2px 0px #6EC610,
+      inset 0px -2px 0px 0px var(--color-primary-dark);
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .btn-3d-green:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .btn-3d-green:active {
+    transform: scale(0.95);
+  }
+
+  /* Red Button - Danger Action */
+  .btn-3d-red {
+    background-color: #DD1D3A;
+    border: 1px solid #C0132D;
+    box-shadow:
+      0px 0px 1px 2px rgba(157, 0, 24, 0.2),  /* Drop Shadow */
+      inset 0px 0px 2px 0px #ED667A,           /* Inner Shadow 1 */
+      inset 0px -2px 0px 0px #280006;          /* Inner Shadow 2 */
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .btn-3d-red:hover {
+    background-color: #c41a33;
+  }
+
+  .btn-3d-red:active {
+    transform: scale(0.95);
+  }
+}

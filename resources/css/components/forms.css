@@ -1,0 +1,218 @@
+@layer components {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  textarea,
+  select {
+    @apply w-full h-[52px] rounded-xl px-4 py-3;
+    @apply bg-white text-gray-900 text-base;
+    @apply border border-gray-300;
+    @apply transition-all duration-200;
+    @apply placeholder:text-gray-400;
+    @apply outline-none;
+  }
+
+  input[type="text"]:hover:not(:disabled):not(:focus),
+  input[type="password"]:hover:not(:disabled):not(:focus),
+  input[type="email"]:hover:not(:disabled):not(:focus),
+  textarea:hover:not(:disabled):not(:focus),
+  select:hover:not(:disabled):not(:focus) {
+    @apply border-gray-400;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  input[type="email"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--color-primary-dark);
+    @apply outline-none;
+    box-shadow: none;
+  }
+
+  /* Filled State */
+  input[type="text"]:not(:placeholder-shown),
+  input[type="password"]:not(:placeholder-shown),
+  input[type="email"]:not(:placeholder-shown),
+  textarea:not(:placeholder-shown) {
+    @apply text-gray-900;
+  }
+
+  /* Error State - Unfilled */
+  input.border-red-500:not(:focus),
+  input[type="text"].border-red-500:not(:focus),
+  input[type="password"].border-red-500:not(:focus),
+  input[type="email"].border-red-500:not(:focus),
+  textarea.border-red-500:not(:focus) {
+    @apply border-red-500;
+  }
+
+  /* Error State - Focus */
+  input.border-red-500:focus,
+  input[type="text"].border-red-500:focus,
+  input[type="password"].border-red-500:focus,
+  input[type="email"].border-red-500:focus,
+  textarea.border-red-500:focus {
+    @apply border-red-500;
+    @apply outline-none;
+    box-shadow: none;
+  }
+
+  /* Error State - Hover */
+  input.border-red-500:hover:not(:focus),
+  input[type="text"].border-red-500:hover:not(:focus),
+  input[type="password"].border-red-500:hover:not(:focus),
+  input[type="email"].border-red-500:hover:not(:focus),
+  textarea.border-red-500:hover:not(:focus) {
+    @apply border-red-600;
+  }
+
+  /* Disabled State */
+  input:disabled,
+  input[type="text"]:disabled,
+  input[type="password"]:disabled,
+  input[type="email"]:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply bg-gray-100 text-gray-500;
+    @apply border-gray-200;
+    @apply cursor-not-allowed;
+    @apply opacity-60;
+  }
+
+  /* Default Label */
+  label {
+    @apply text-sm font-medium text-gray-700;
+    @apply block mb-2;
+  }
+
+  /* Mandatory Indicator */
+  label .required,
+  label .mandatory {
+    @apply text-red-500;
+  }
+
+  /* Disabled Label */
+  label:has(+ input:disabled),
+  label:has(+ textarea:disabled),
+  label:has(+ select:disabled) {
+    @apply text-gray-500;
+  }
+
+  /* Hint Message */
+  .hint-message,
+  .input-hint {
+    @apply text-xs text-gray-500;
+    @apply mt-1.5;
+  }
+
+  /* Error Message */
+  .error-message,
+  .input-error-message {
+    @apply text-xs text-red-500;
+    @apply mt-1.5;
+  }
+
+  /* Input Group Container */
+  .input-group,
+  .form-group {
+    @apply flex flex-col gap-2;
+    @apply w-full;
+  }
+
+  /* ========================================================================
+     FORM INPUT CLASSES (New - Figma Pixel Perfect)
+     ======================================================================== */
+
+  /* Form Input Base Style */
+  .form-input {
+    width: 100% !important;
+    height: 49px !important;
+    border-radius: 16px !important;
+    padding: 0 16px !important;
+    background-color: white !important;
+    color: #111827 !important;
+    border: 1px solid #D1D5DB !important;
+    transition: all 0.2s ease !important;
+    font-size: 16px !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .form-input::placeholder {
+    color: #9CA3AF !important;
+  }
+
+  /* Focus State - Primary/100 #186D3C */
+  .form-input:focus {
+    border-color: #186D3C !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Hover State */
+  .form-input:hover:not(:focus):not(:disabled) {
+    border-color: #9CA3AF !important;
+  }
+
+  /* Error State - Error/80 #E47689 */
+  .form-input.error {
+    border-color: #E47689 !important;
+  }
+
+  /* Error + Focus State */
+  .form-input.error:focus {
+    border-color: #E47689 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Disabled State */
+  .form-input:disabled {
+    background-color: #F3F4F6 !important;
+    color: #9CA3AF !important;
+    cursor: not-allowed !important;
+  }
+
+  /* Form Textarea */
+  .form-textarea {
+    height: auto !important;
+    min-height: 100px !important;
+    padding: 12px 16px !important;
+    resize: vertical !important;
+  }
+
+  /* Form Select/Dropdown */
+  .form-select {
+    cursor: pointer !important;
+    background-image: none !important;
+  }
+
+  /* Form Date Input */
+  .form-input[type="date"] {
+    padding-right: 12px !important;
+  }
+
+  /* Form Label Styles */
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  /* Form Helper Text */
+  .form-helper {
+    font-size: 12px;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  /* Form Error Text */
+  .form-error {
+    font-size: 12px;
+    color: #E47689;
+    margin-top: 4px;
+  }
+}

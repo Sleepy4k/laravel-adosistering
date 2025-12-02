@@ -16,7 +16,75 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} - {{ config('app.name', 'Laravel') }}</title>
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-color': '#4F46E5',
+                        'primary-hover': '#4338CA',
+                        'primary-darker': '#3730A3'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Form Styles -->
+    <style>
+        /* Form Input Base Style */
+        .form-input {
+            width: 100%;
+            height: 49px;
+            border-radius: 16px;
+            padding: 0 16px;
+            background-color: white;
+            color: #111827;
+            border: 1px solid #D1D5DB;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        /* Focus State - Primary/100 #186D3C */
+        .form-input:focus {
+            border-color: #186D3C;
+            outline: none;
+        }
+
+        /* Error State - Error/80 #E47689 */
+        .form-input.error {
+            border-color: #E47689;
+        }
+
+        /* Error + Focus State */
+        .form-input.error:focus {
+            border-color: #E47689;
+            outline: none;
+        }
+
+        /* Form Label Styles */
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        /* Form Error Text */
+        .form-error {
+            font-size: 12px;
+            color: #E47689;
+            margin-top: 4px;
+        }
+    </style>
     
     <!-- Alpine.js for interactive components -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -45,7 +113,7 @@
 
             <!-- Username Field -->
             <div class="w-full flex flex-col gap-2">
-                <label for="username" class="text-sm font-medium text-gray-700">
+                <label for="username" class="form-label">
                     Username
                 </label>
                 <input
@@ -55,17 +123,17 @@
                     value="{{ old('username') }}"
                     required
                     autofocus
-                    class="w-full h-[52px] rounded-xl px-4 bg-white text-gray-900 border transition-all duration-200 placeholder:text-gray-400 text-base outline-none {{ $errors->has('username') ? 'border-red-500' : '' }}"
+                    class="form-input {{ $errors->has('username') ? 'error' : '' }}"
                     placeholder="Masukkan username"
                 />
                 @error('username')
-                    <span class="text-xs text-red-500">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                 @enderror
             </div>
 
             <!-- Password Field -->
             <div class="w-full flex flex-col gap-2" x-data="{ showPassword: false }">
-                <label for="password" class="text-sm font-medium text-gray-700">
+                <label for="password" class="form-label">
                     Password
                 </label>
                 <div class="relative">
@@ -74,7 +142,7 @@
                         id="password"
                         name="password"
                         required
-                        class="w-full h-[52px] rounded-xl px-4 pr-12 bg-white text-gray-900 border transition-all duration-200 placeholder:text-gray-400 text-base outline-none {{ $errors->has('password') ? 'border-red-500' : '' }}"
+                        class="form-input pr-12 {{ $errors->has('password') ? 'error' : '' }}"
                         placeholder="Masukkan password"
                     />
                     <button
@@ -96,7 +164,7 @@
                     </button>
                 </div>
                 @error('password')
-                    <span class="text-xs text-red-500">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                 @enderror
             </div>
 

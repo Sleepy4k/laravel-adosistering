@@ -6,7 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ config('app.name', 'Laravel') }} - @yield('title', 'Dashboard')</title>
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Vite CSS Build -->
+    @vite('resources/css/app.css')
     
     @stack('styles')
 </head>
@@ -34,6 +35,9 @@
         </main>
     </div>
 
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     @stack('scripts')
 </body>
 </html>

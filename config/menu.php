@@ -6,7 +6,7 @@ return [
             'label' => 'Beranda',
             'icon' => 'home.svg',
             'route' => 'user.dashboard',
-            'active' => ['user.dashboard', 'user.iot-sensor.detail'], // Array untuk multiple routes
+            'active' => 'user.dashboard',
         ],
         [
             'label' => 'Riwayat Irigasi',
@@ -39,13 +39,7 @@ return [
             'label' => 'Beranda',
             'icon' => 'home.svg',
             'route' => 'admin.dashboard',
-            'active' => ['admin.dashboard'],
-        ],
-        [
-            'label' => 'Manajemen User',
-            'icon' => 'profile.svg',
-            'route' => '#',
-            'active' => 'admin.users*',
+            'active' => ['admin.dashboard', 'admin.users*'],
         ],
         [
             'label' => 'Riwayat Irigasi',

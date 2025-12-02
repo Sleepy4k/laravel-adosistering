@@ -1,0 +1,41 @@
+@layer components {
+  /* Background Utilities */
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-primary-dark {
+    background-color: var(--color-primary-dark);
+  }
+
+  .bg-primary-hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  /* Text Color Utilities */
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .text-inverse {
+    color: var(--color-text-inverse);
+  }
+
+  .text-green {
+    color: var(--color-text-green);
+  }
+
+  /* Link Utilities */
+  .link {
+    color: var(--color-link);
+    transition: color 0.2s ease;
+  }
+
+  .link:hover {
+    color: var(--color-link-hover);
+  }
+}
