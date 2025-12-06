@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.superadmin')
 
 @section('title', 'Tambah Pengguna')
 
@@ -56,7 +56,7 @@
         </div>
         <div>
             <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-                <a href="{{ route('admin.dashboard') }}" class="text-base hover:text-primary-color transition-colors">Beranda</a>
+                <a href="{{ route('superadmin.dashboard') }}" class="text-base hover:text-primary-color transition-colors">Beranda</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -65,7 +65,7 @@
         </div>
 
         <!-- Form Container - Card Data Wajib -->
-        <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('superadmin.users.store') }}" method="POST" class="space-y-6">
             @csrf
 
             <!-- Card Data Wajib -->
@@ -105,7 +105,7 @@
                             Pilih Pengguna
                         </button>
                     </div>
-c
+
                     <!-- Form Fields Data Wajib -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-16">
                         <!-- Nama Pengguna -->

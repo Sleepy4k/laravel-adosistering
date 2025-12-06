@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Pengguna')
+@section('title', 'Data Pengguna')
 
 @section('content')
-    <div class="max-w-7xl mx-auto" x-data="tambahPengguna()">
+    <div class="max-w-7xl mx-auto" x-data="editPengguna()">
 
         <!-- Flash Messages -->
         @if (session('success'))
@@ -17,6 +17,22 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm font-medium">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if (session('wa_sent'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6" role="alert">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">Kredensial berhasil dikirim via WhatsApp!</p>
                     </div>
                 </div>
             </div>
@@ -43,30 +59,46 @@
             </div>
         @endif
 
-        <!-- Header Section -->
-
-        <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-4 mb-6">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-[#4F4F4F]">Beranda</h1>
-                <p class="text-sm text-gray-500" x-data="{ currentDate: '' }" x-init="const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                const now = new Date();
-                currentDate = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();" x-text="currentDate"></p>
+        <!-- Header Section with Title and Action Buttons -->
+        <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h1 class="text-2xl font-bold text-[#4F4F4F]">Data Pengguna</h1>
+                <div class="flex items-center gap-3">
+                    <!-- Kirim Kredensial WA Button -->
+                    <button type="button" 
+                        @click="showKredensialModal = true"
+                        class="btn-3d-green inline-flex items-center gap-4">
+                        <img src="{{ asset('assets/icons/chat.svg') }}" alt="Chat Icon" class="w-5 h-5">
+                        <span>Kirim Kredensial (WA)</span>
+                    </button>
+                    
+                    <!-- Edit Button -->
+                    <button type="button" 
+                        @click="isEditing = !isEditing"
+                        :class="isEditing ? 'btn-3d-red' : 'btn-3d-blue'"
+                        class="inline-flex items-center gap-4">
+                        <img src="{{ asset('assets/icons/edit.svg') }}" alt="Edit Icon" class="w-5 h-5">
+                        <span x-text="isEditing ? 'Batal Edit' : 'Edit'"></span>
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- Breadcrumb -->
         <div>
             <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
                 <a href="{{ route('admin.dashboard') }}" class="text-base hover:text-primary-color transition-colors">Beranda</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
-                <span class="text-base text-gray-400">Tambah Pengguna</span>
+                <span class="text-base text-gray-400">Lihat Data Pengguna</span>
             </nav>
         </div>
 
-        <!-- Form Container - Card Data Wajib -->
-        <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-6">
+        <!-- Form Container -->
+        <form action="{{ route('admin.users.update', $user['id'] ?? 1) }}" method="POST" class="space-y-6">
             @csrf
+            @method('PUT')
 
             <!-- Card Data Wajib -->
             <div class="bg-white rounded-2xl border border-[#C2C2C2] overflow-hidden">
@@ -95,25 +127,22 @@
                     x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0"
                     class="px-6 pb-6 space-y-6 overflow-hidden">
 
-                    <!-- Pilih Pengguna Button -->
+                    <!-- Info Text -->
                     <div class="mb-6">
-                        <p class="text-sm text-gray-600 mb-4">Apabila menginput pengguna baru, silahkan isi formulir berikut
-                        </p>
-                        <button @click="showUserModal = true" type="button"
-                            class="btn-3d-green inline-flex items-center px-6 py-3 font-medium rounded-xl transition-colors duration-200">
-                            <img src="{{ asset('assets/icons/person.svg') }}" alt="Person Icon" class="w-4 h-4 mr-2">
-                            Pilih Pengguna
-                        </button>
+                        <p class="text-sm text-gray-600">Apabila menginput pengguna baru, silahkan isi formulir berikut</p>
                     </div>
-c
+
                     <!-- Form Fields Data Wajib -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-16">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-16e">
                         <!-- Nama Pengguna -->
                         <div>
                             <label for="nama_pengguna" class="form-label">Nama Pengguna</label>
                             <input type="text" id="nama_pengguna" name="nama_pengguna" x-model="formData.nama_pengguna"
                                 placeholder="Masukkan nama pengguna"
-                                class="form-input @error('nama_pengguna') error @enderror" required>
+                                class="form-input @error('nama_pengguna') error @enderror"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''"
+                                required>
                             <p class="form-helper">Nama akan ditampilkan di card pengguna pada dashboard</p>
                             @error('nama_pengguna')
                                 <p class="form-error">{{ $message }}</p>
@@ -125,7 +154,10 @@ c
                             <label for="nomor_whatsapp" class="form-label">Nomor WhatsApp</label>
                             <input type="text" id="nomor_whatsapp" name="nomor_whatsapp"
                                 x-model="formData.nomor_whatsapp" placeholder="Masukkan nomor WhatsApp"
-                                class="form-input @error('nomor_whatsapp') error @enderror" required>
+                                class="form-input @error('nomor_whatsapp') error @enderror"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''"
+                                required>
                             <p class="form-helper">Nomor untuk kontak dan WhatsApp</p>
                             @error('nomor_whatsapp')
                                 <p class="form-error">{{ $message }}</p>
@@ -137,6 +169,8 @@ c
                             <label for="email" class="form-label">Email</label>
                             <input type="email" id="email" name="email" x-model="formData.email"
                                 placeholder="Masukkan email pengguna" class="form-input @error('email') error @enderror"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''"
                                 required>
                             <p class="form-helper">Email untuk komunikasi digital</p>
                             @error('email')
@@ -149,8 +183,10 @@ c
                             <label for="jenis_pengguna" class="form-label">Jenis Pengguna</label>
                             <input type="hidden" name="jenis_pengguna" x-model="formData.jenis_pengguna">
                             <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open" type="button"
-                                    class="form-input form-select text-left flex items-center justify-between @error('jenis_pengguna') error @enderror">
+                                <button @click="isEditing && (open = !open)" type="button"
+                                    class="form-input form-select text-left flex items-center justify-between @error('jenis_pengguna') error @enderror"
+                                    :disabled="!isEditing"
+                                    :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                                     <span x-text="formData.jenis_pengguna || 'Pilih jenis pengguna'"
                                         :class="formData.jenis_pengguna ? 'text-gray-700' : 'text-gray-400'"></span>
                                     <svg class="w-4 h-4 text-gray-400 transition-transform"
@@ -161,7 +197,7 @@ c
                                     </svg>
                                 </button>
 
-                                <div x-show="open" x-transition @click.away="open = false"
+                                <div x-show="open && isEditing" x-transition @click.away="open = false"
                                     class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg"
                                     style="display: none;">
                                     <button @click="formData.jenis_pengguna = 'Individu'; open = false" type="button"
@@ -183,21 +219,24 @@ c
 
                         <!-- Password -->
                         <div>
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">Password Baru <span class="text-xs text-gray-400">(Opsional)</span></label>
                             <div class="relative" x-data="{ showPassword: false }">
                                 <input :type="showPassword ? 'text' : 'password'" id="password" name="password" 
                                     x-model="formData.password"
-                                    placeholder="Masukkan password"
-                                    class="form-input pr-12 @error('password') error @enderror" required>
+                                    placeholder="Kosongkan jika tidak ingin mengubah password"
+                                    class="form-input pr-12 @error('password') error @enderror"
+                                    :disabled="!isEditing"
+                                    :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                                 <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+                                    :class="!isEditing ? 'cursor-not-allowed' : ''">
                                     <span class="relative w-5 h-5">
                                         <img x-show="!showPassword" src="{{ asset('assets/icons/eye_on.svg') }}" alt="Show Password" class="w-5 h-5 absolute inset-0">
                                         <img x-show="showPassword" src="{{ asset('assets/icons/eye_off.svg') }}" alt="Hide Password" class="w-5 h-5 absolute inset-0">
                                     </span>
                                 </button>
                             </div>
-                            <p class="form-helper">Password untuk login pengguna (min. 8 karakter)</p>
+                            <p class="form-helper">Masukkan password baru jika ingin mengubah (min. 8 karakter)</p>
                             @error('password')
                                 <p class="form-error">{{ $message }}</p>
                             @enderror
@@ -242,7 +281,10 @@ c
                         <div>
                             <label for="nama_panggilan" class="form-label">Nama Panggilan</label>
                             <input type="text" id="nama_panggilan" name="nama_panggilan"
-                                x-model="formData.nama_panggilan" placeholder="Panggilan akrab" class="form-input">
+                                x-model="formData.nama_panggilan" placeholder="Panggilan akrab" 
+                                class="form-input"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                         </div>
 
                         <!-- Jenis Kelamin -->
@@ -250,8 +292,10 @@ c
                             <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
                             <input type="hidden" name="jenis_kelamin" x-model="formData.jenis_kelamin">
                             <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open" type="button"
-                                    class="form-input form-select text-left flex items-center justify-between">
+                                <button @click="isEditing && (open = !open)" type="button"
+                                    class="form-input form-select text-left flex items-center justify-between"
+                                    :disabled="!isEditing"
+                                    :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                                     <span x-text="formData.jenis_kelamin || 'Pilih jenis kelamin'"
                                         :class="formData.jenis_kelamin ? 'text-gray-700' : 'text-gray-400'"></span>
                                     <svg class="w-4 h-4 text-gray-400 transition-transform"
@@ -262,7 +306,7 @@ c
                                     </svg>
                                 </button>
 
-                                <div x-show="open" x-transition @click.away="open = false"
+                                <div x-show="open && isEditing" x-transition @click.away="open = false"
                                     class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg"
                                     style="display: none;">
                                     <button @click="formData.jenis_kelamin = 'Laki-laki'; open = false" type="button"
@@ -281,14 +325,20 @@ c
                         <div>
                             <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
                             <input type="date" id="tanggal_lahir" name="tanggal_lahir"
-                                x-model="formData.tanggal_lahir" class="form-input">
+                                x-model="formData.tanggal_lahir" 
+                                class="form-input"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                         </div>
 
                         <!-- No. HP / WhatsApp Lain -->
                         <div>
                             <label for="hp_lain" class="form-label">No. HP / WhatsApp Lain</label>
                             <input type="text" id="hp_lain" name="hp_lain" x-model="formData.hp_lain"
-                                placeholder="08xxxxxxxxx" class="form-input">
+                                placeholder="08xxxxxxxxx" 
+                                class="form-input"
+                                :disabled="!isEditing"
+                                :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''">
                         </div>
                     </div>
 
@@ -296,41 +346,44 @@ c
                     <div class="mt-6">
                         <label for="alamat_lengkap" class="form-label">Alamat Lengkap</label>
                         <textarea id="alamat_lengkap" name="alamat_lengkap" x-model="formData.alamat_lengkap" rows="4"
-                            placeholder="Masukkan alamat lengkap..." class="form-input form-textarea resize-none"></textarea>
+                            placeholder="Masukkan alamat lengkap..." 
+                            class="form-input form-textarea resize-none"
+                            :disabled="!isEditing"
+                            :class="!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-end space-x-3 pt-4">
+            <!-- Action Buttons (Show only when editing) -->
+            <div x-show="isEditing" x-transition class="flex items-center justify-end space-x-3 pt-4">
                 <button type="button" @click="resetForm()"
                     class="px-8 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors duration-200">
                     Reset
                 </button>
                 <button type="submit"
                     class="btn-3d-green px-8 py-3 font-medium rounded-xl transition-colors duration-200">
-                    Simpan Pengguna
+                    Simpan Perubahan
                 </button>
             </div>
         </form>
 
-        <!-- Modal Pilih Pengguna -->
-        <div x-show="showUserModal" x-transition:enter="transition-opacity ease-out duration-300"
+        <!-- Modal Preview Kredensial WA -->
+        <div x-show="showKredensialModal" x-transition:enter="transition-opacity ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition-opacity ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
 
-            <!-- Overlay - Background sedikit gelap -->
-            <div class="fixed inset-0 bg-black/30" @click="showUserModal = false"></div>
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-black/30" @click="showKredensialModal = false"></div>
 
             <!-- Modal Content -->
             <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl" @click.away="showUserModal = false">
+                <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-xl" @click.away="showKredensialModal = false">
 
                     <!-- Modal Header -->
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900">Pilih Pengguna</h3>
-                        <button @click="showUserModal = false"
+                        <h3 class="text-lg font-semibold text-gray-900">Preview Kredensial WhatsApp</h3>
+                        <button @click="showKredensialModal = false"
                             class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -339,53 +392,48 @@ c
                         </button>
                     </div>
 
-                    <!-- Search -->
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="relative">
-                            <input type="text" x-model="searchUser" placeholder="Cari pengguna..."
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-color focus:border-transparent">
-                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
+                    <!-- Modal Body - WhatsApp Message Preview -->
+                    <div class="p-6">
+                        <div class="bg-[#E7FFDB] rounded-xl p-4 shadow-sm">
+                            <div class="text-sm text-gray-800 space-y-1">
+                                <p class="font-semibold">Ini adalah Kredensial Akses Perangkat IoT Adosistering</p>
+                                <p>ℹ️ Nama: <span x-text="formData.nama_pengguna"></span></p>
+                                <p>🔗 URL Login: <span class="text-blue-600">{{ config('app.url', 'Adosistering.com') }}</span></p>
+                                <p>👤 Username: <span x-text="kredensial.username"></span></p>
+                                <p>🔒 Password: <span x-text="kredensial.password"></span></p>
+                                <p class="pt-2">🔑 API Key: <span x-text="kredensial.apiKey || '-'"></span></p>
+                                <p>📍 Domisili: <span x-text="kredensial.domisili || '-'"></span></p>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- User List -->
-                    <div class="max-h-96 overflow-y-auto">
-                        <template x-for="user in filteredUsers" :key="user.id">
-                            <div class="px-6 py-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                                @click="selectUser(user)">
-                                <div class="flex items-center gap-3">
-                                    <!-- Avatar -->
-                                    <img :src="user.profileImage || '{{ asset('assets/images/default-avatar.jpg') }}'" 
-                                         :alt="user.nama"
-                                         class="w-10 h-10 rounded-full object-cover">
-                                    
-                                    <!-- User Info -->
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="font-medium text-gray-900 truncate" x-text="user.nama"></h4>
-                                        <p class="text-sm text-gray-500" x-text="user.whatsapp + ' · ' + user.email"></p>
-                                    </div>
-                                    
-                                    <!-- Jenis Badge -->
-                                    <span class="text-xs text-gray-400" x-text="user.jenis"></span>
-                                </div>
-                            </div>
-                        </template>
                         
-                        <!-- Empty State -->
-                        <template x-if="filteredUsers.length === 0">
-                            <div class="px-6 py-8 text-center">
-                                <p class="text-gray-500">Pengguna tidak ditemukan</p>
-                            </div>
-                        </template>
+                        <p class="text-sm text-gray-500 mt-4 text-center">
+                            Pesan ini akan dikirim ke nomor <strong x-text="formData.nomor_whatsapp"></strong>
+                        </p>
                     </div>
 
                     <!-- Modal Footer -->
-                    <div class="px-6 py-4 bg-gray-50 rounded-b-2xl">
-                        <p class="text-sm text-gray-500 text-center">Pilih pengguna atau tutup untuk membuat baru</p>
+                    <div class="px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end gap-3">
+                        <button @click="showKredensialModal = false" type="button"
+                            class="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                            Batal
+                        </button>
+                        <form action="{{ route('admin.users.send-credential', $user['id'] ?? 1) }}" method="POST" class="inline">
+                            @csrf
+                            <!-- Hidden fields for kredensial data -->
+                            <input type="hidden" name="nama" x-bind:value="formData.nama_pengguna">
+                            <input type="hidden" name="nomor_whatsapp" x-bind:value="formData.nomor_whatsapp">
+                            <input type="hidden" name="username" x-bind:value="kredensial.username">
+                            <input type="hidden" name="password" x-bind:value="kredensial.password">
+                            <input type="hidden" name="api_key" x-bind:value="kredensial.apiKey">
+                            <input type="hidden" name="domisili" x-bind:value="kredensial.domisili">
+                            <button type="submit"
+                                class="inline-flex items-center px-6 py-2.5 bg-[#25D366] hover:bg-[#20BD5A] text-white font-medium rounded-xl transition-colors duration-200 gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                </svg>
+                                Kirim via WhatsApp
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -394,96 +442,45 @@ c
 
     <!-- Alpine.js Script -->
     <script>
-        function tambahPengguna() {
+        function editPengguna() {
             return {
+                isEditing: false,
                 dataWajibOpen: true,
                 dataOpsionalOpen: false,
-                showUserModal: false,
-                searchUser: '',
+                showKredensialModal: false,
+                
+                // Data dari backend (akan di-populate dari server)
                 formData: {
-                    nama_pengguna: '',
-                    nomor_whatsapp: '',
-                    email: '',
-                    jenis_pengguna: '',
+                    nama_pengguna: '{{ $user["nama_pengguna"] ?? "Muchtarom" }}',
+                    nomor_whatsapp: '{{ $user["nomor_whatsapp"] ?? "081234567890" }}',
+                    email: '{{ $user["email"] ?? "muchtarom@gmail.com" }}',
+                    jenis_pengguna: '{{ $user["jenis_pengguna"] ?? "Individu" }}',
                     password: '',
-                    nama_panggilan: '',
-                    jenis_kelamin: '',
-                    tanggal_lahir: '',
-                    hp_lain: '',
-                    alamat_lengkap: ''
+                    nama_panggilan: '{{ $user["nama_panggilan"] ?? "" }}',
+                    jenis_kelamin: '{{ $user["jenis_kelamin"] ?? "" }}',
+                    tanggal_lahir: '{{ $user["tanggal_lahir"] ?? "" }}',
+                    hp_lain: '{{ $user["hp_lain"] ?? "" }}',
+                    alamat_lengkap: '{{ $user["alamat_lengkap"] ?? "" }}'
                 },
-                dummyUsers: [{
-                        id: 1,
-                        nama: 'Budi Santoso',
-                        email: 'budi@gmail.com',
-                        whatsapp: '08123456789',
-                        jenis: 'Individu',
-                        profileImage: null
-                    },
-                    {
-                        id: 2,
-                        nama: 'Sari Dewi',
-                        email: 'sari@gmail.com',
-                        whatsapp: '08234567890',
-                        jenis: 'Individu',
-                        profileImage: null
-                    },
-                    {
-                        id: 3,
-                        nama: 'Ahmad Wijaya',
-                        email: 'ahmad@gmail.com',
-                        whatsapp: '08345678901',
-                        jenis: 'Institusi/Lembaga',
-                        profileImage: null
-                    },
-                    {
-                        id: 4,
-                        nama: 'Dewi Lestari',
-                        email: 'dewi@gmail.com',
-                        whatsapp: '08456789012',
-                        jenis: 'Individu',
-                        profileImage: null
-                    },
-                    {
-                        id: 5,
-                        nama: 'Eko Prasetyo',
-                        email: 'eko@gmail.com',
-                        whatsapp: '08567890123',
-                        jenis: 'Individu',
-                        profileImage: null
-                    }
-                ],
-
-                get filteredUsers() {
-                    if (!this.searchUser) return this.dummyUsers;
-                    return this.dummyUsers.filter(user =>
-                        user.nama.toLowerCase().includes(this.searchUser.toLowerCase()) ||
-                        user.email.toLowerCase().includes(this.searchUser.toLowerCase()) ||
-                        user.whatsapp.includes(this.searchUser)
-                    );
+                
+                // Backup data untuk reset
+                originalData: null,
+                
+                // Kredensial data untuk WhatsApp
+                kredensial: {
+                    username: '{{ $user["username"] ?? "muchtarom01" }}',
+                    password: '{{ $user["password"] ?? "muchtarom123" }}',
+                    apiKey: '{{ $user["api_key"] ?? "" }}',
+                    domisili: '{{ $user["domisili"] ?? "Purbalingga" }}'
                 },
 
-                selectUser(user) {
-                    this.formData.nama_pengguna = user.nama;
-                    this.formData.email = user.email;
-                    this.formData.nomor_whatsapp = user.whatsapp;
-                    this.formData.jenis_pengguna = user.jenis;
-                    this.showUserModal = false;
-                    this.searchUser = '';
+                init() {
+                    // Simpan original data untuk reset
+                    this.originalData = JSON.parse(JSON.stringify(this.formData));
                 },
 
                 resetForm() {
-                    this.formData = {
-                        nama_pengguna: '',
-                        nomor_whatsapp: '',
-                        email: '',
-                        jenis_pengguna: '',
-                        nama_panggilan: '',
-                        jenis_kelamin: '',
-                        tanggal_lahir: '',
-                        hp_lain: '',
-                        alamat_lengkap: ''
-                    };
+                    this.formData = JSON.parse(JSON.stringify(this.originalData));
                 }
             }
         }

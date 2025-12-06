@@ -8,7 +8,9 @@
       inset 0px -2px 0px 0px var(--color-primary-dark);
     color: white;
     font-weight: 500;
-    border-radius: 0.5rem;
+    padding: 10px 24px;
+    gap: 16px;
+    border-radius: 10px;
     transition: transform 0.1s ease-in-out;
   }
 
@@ -30,7 +32,9 @@
       inset 0px -2px 0px 0px #280006;          /* Inner Shadow 2 */
     color: white;
     font-weight: 500;
-    border-radius: 0.5rem;
+    padding: 10px 24px;
+    gap: 16px;
+    border-radius: 10px;
     transition: transform 0.1s ease-in-out;
   }
 
@@ -39,6 +43,30 @@
   }
 
   .btn-3d-red:active {
+    transform: scale(0.95);
+  }
+
+  /* Blue Button - Info/Edit Action */
+  .btn-3d-blue {
+    background-color: #0F92F0;
+    border: 1px solid #066FBA;
+    box-shadow:
+      0px 0px 1px 2px rgba(71, 117, 182, 0.88),  /* Drop Shadow */
+      inset 0px 0px 2px 0px #30AFFF,              /* Inner Shadow 1 */
+      inset 0px -2px 0px 0px #193467;             /* Inner Shadow 2 */
+    color: white;
+    font-weight: 500;
+    padding: 10px 24px;
+    gap: 16px;
+    border-radius: 10px;
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .btn-3d-blue:hover {
+    background-color: #0d82d6;
+  }
+
+  .btn-3d-blue:active {
     transform: scale(0.95);
   }
 }

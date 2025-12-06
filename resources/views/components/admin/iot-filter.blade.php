@@ -1,8 +1,13 @@
 @props([
     'statusSensor' => 'Semua',
     'statusPompa' => 'Semua',
-    'searchQuery' => ''
+    'searchQuery' => '',
+    'role' => 'admin'
 ])
+
+@php
+    $createRoute = $role === 'superadmin' ? 'superadmin.users.create' : 'admin.users.create';
+@endphp
 
 <div class="bg-white rounded-2xl border border-[#C2C2C2] py-4 px-6 mb-6">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -86,7 +91,7 @@
         <!-- Right side: Add User Button -->
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium text-transparent">Action</label>
-            <a href="{{ route('admin.users.create') }}" 
+            <a href="{{ route($createRoute) }}" 
                class="bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-6 rounded-xl transition-colors duration-200 flex items-center gap-2 whitespace-nowrap h-11">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
