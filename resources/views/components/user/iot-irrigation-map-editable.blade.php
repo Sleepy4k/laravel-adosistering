@@ -612,23 +612,35 @@
         // ============================================
         const allCoords = [];
         
+        // Color coding: abu-abu (belum disiram 24 jam), merah (kekeringan), hijau (telah disiram)
+        function getBlockColorByStatus(status) {
+            if (status === 'belum_disiram') return '#9ca3af'; // gray-400
+            if (status === 'kekeringan') return '#ef4444'; // red-500
+            if (status === 'telah_disiram') return '#22c55e'; // green-500
+            return '#3b82f6'; // fallback blue
+        }
+
         mapData.areas.forEach(area => {
+            // Contoh: area.status = 'belum_disiram' | 'kekeringan' | 'telah_disiram'
+            const fill = getBlockColorByStatus(area.status || 'telah_disiram');
             const polygon = L.polygon(area.coordinates, {
-                color: area.color,
-                fillColor: area.color,
-                fillOpacity: area.fillOpacity,
+                color: fill,
+                fillColor: fill,
+                fillOpacity: 0.18,
                 weight: 3
             }).addTo(layers.areas);
-            
             // Collect coordinates for bounds
             area.coordinates.forEach(coord => allCoords.push(coord));
-            
+            let statusLabel = 'Aktif';
+            if (area.status === 'belum_disiram') statusLabel = 'Belum Disiram 24 Jam';
+            if (area.status === 'kekeringan') statusLabel = 'Kekeringan';
+            if (area.status === 'telah_disiram') statusLabel = 'Telah Disiram';
             polygon.bindPopup(`
                 <div style="min-width: 180px;">
                     <strong style="font-size: 16px; color: #1f2937; display: block; margin-bottom: 8px;">${area.name}</strong>
                     <div style="font-size: 13px; color: #6b7280;">
                         <div>📍 <strong>Area Irigasi</strong></div>
-                        <div>📏 <strong>Status:</strong> <span style="color: ${area.color}; font-weight: 600;">Aktif</span></div>
+                        <div>📏 <strong>Status:</strong> <span style="color: ${fill}; font-weight: 600;">${statusLabel}</span></div>
                     </div>
                 </div>
             `);

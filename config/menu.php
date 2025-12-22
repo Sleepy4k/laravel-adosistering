@@ -11,7 +11,7 @@ return [
         [
             'label' => 'Riwayat Irigasi',
             'icon' => 'history.svg',
-            'route' => '#',
+            'route' => 'user.history',
             'active' => 'user.history*',
         ],
         [

@@ -129,7 +129,7 @@
                     @click="togglePump()"
                     :disabled="isAutoIrrigation"
                     class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
-                    :class="isPumpOn ? 'bg-[#186D3C]' : 'bg-gray-300'"
+                    :class="isPumpOn ? 'bg-[#67B744]' : 'bg-gray-300'"
                     :style="isAutoIrrigation ? 'opacity: 0.5; cursor: not-allowed;' : ''">
                 <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md"
                       :class="isPumpOn ? 'translate-x-6' : 'translate-x-1'"></span>
@@ -142,7 +142,7 @@
             <button type="button" 
                     @click="toggleAutoIrrigation()"
                     class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors"
-                    :class="isAutoIrrigation ? 'bg-[#186D3C]' : 'bg-gray-300'">
+                    :class="isAutoIrrigation ? 'bg-[#67B744]' : 'bg-gray-300'">
                 <span class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md"
                       :class="isAutoIrrigation ? 'translate-x-6' : 'translate-x-1'"></span>
             </button>
