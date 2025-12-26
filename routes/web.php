@@ -17,41 +17,57 @@ Route::get('/superadmin/login', [AuthController::class, 'superAdminLogin'])->nam
 Route::post('/superadmin/login', [AuthController::class, 'handleSuperAdminLogin'])->name('superadmin.login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/user/dashboard', function () {
-    return view('user.dashboard');
-})->name('user.dashboard');
-
+Route::get('/user/profile', function () {
+    $profile = config('dummy.current_user');
+    return view('user.profile', compact('profile'));
+})->name('user.profile');
 
 Route::get('/user/history', function () {
-    return view('user.irrigation-history');
+    $irrigationHistory = config('dummy.irrigation_history');
+    return view('user.irrigation-history', compact('irrigationHistory'));
 })->name('user.history');
+
+Route::get('/user/dashboard', function () {
+    $blocks = config('dummy.blocks');
+    return view('user.dashboard', compact('blocks'));
+})->name('user.dashboard');
 
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
 // Admin Users Management
 Route::get('/admin/users', function () {
-    return view('admin.users.index');
+    $users = config('dummy.users');
+    return view('admin.users.index', compact('users'));
 })->name('admin.users.index');
 Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
 Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
 Route::get('/admin/users/{id}/edit', function ($id) {
-    // Dummy user data untuk frontend development
-    $user = [
-        'id' => $id,
-        'nama_pengguna' => 'Muchtarom',
-        'nomor_whatsapp' => '081234567890',
-        'email' => 'muchtarom@gmail.com',
-        'jenis_pengguna' => 'Individu',
-        'nama_panggilan' => '',
-        'jenis_kelamin' => '',
-        'tanggal_lahir' => '',
-        'hp_lain' => '',
-        'alamat_lengkap' => '',
-        'username' => 'muchtarom01',
-        'password' => 'muchtarom123',
-        'api_key' => '',
-        'domisili' => 'Purbalingga'
-    ];
+    // Fetch user from dummy data
+    $users = config('dummy.users');
+    $user = collect($users)->firstWhere('id', (int) $id);
+    
+    if (!$user) {
+        // Fallback jika user tidak ditemukan
+        $user = [
+            'id' => $id,
+            'nama_pengguna' => 'User Not Found',
+            'nomor_whatsapp' => '',
+            'email' => '',
+            'jenis_pengguna' => 'Individu',
+            'nama_panggilan' => '',
+            'jenis_kelamin' => '',
+            'tanggal_lahir' => '',
+            'hp_lain' => '',
+            'pekerjaan' => '',
+            'wilayah' => '',
+            'alamat_lengkap' => '',
+            'catatan_internal' => '',
+            'username' => '',
+            'password' => '',
+            'api_key' => '',
+        ];
+    }
+    
     return view('admin.users.edit', compact('user'));
 })->name('admin.users.edit');
 Route::put('/admin/users/{id}', function ($id) {
@@ -80,7 +96,8 @@ Route::get('/superadmin/dashboard', function () {
 
 // Super Admin Users Management
 Route::get('/superadmin/users', function () {
-    return view('superadmin.users.index');
+    $users = config('dummy.users');
+    return view('superadmin.users.index', compact('users'));
 })->name('superadmin.users.index');
 Route::get('/superadmin/users/create', function () {
     return view('superadmin.users.create');
@@ -90,23 +107,32 @@ Route::post('/superadmin/users', function () {
     return redirect()->route('superadmin.dashboard')->with('success', 'Pengguna berhasil ditambahkan!');
 })->name('superadmin.users.store');
 Route::get('/superadmin/users/{id}/edit', function ($id) {
-    // Dummy user data untuk frontend development
-    $user = [
-        'id' => $id,
-        'nama_pengguna' => 'Muchtarom',
-        'nomor_whatsapp' => '081234567890',
-        'email' => 'muchtarom@gmail.com',
-        'jenis_pengguna' => 'Individu',
-        'nama_panggilan' => '',
-        'jenis_kelamin' => '',
-        'tanggal_lahir' => '',
-        'hp_lain' => '',
-        'alamat_lengkap' => '',
-        'username' => 'muchtarom01',
-        'password' => 'muchtarom123',
-        'api_key' => '',
-        'domisili' => 'Purbalingga'
-    ];
+    // Fetch user from dummy data
+    $users = config('dummy.users');
+    $user = collect($users)->firstWhere('id', (int) $id);
+    
+    if (!$user) {
+        // Fallback jika user tidak ditemukan
+        $user = [
+            'id' => $id,
+            'nama_pengguna' => 'User Not Found',
+            'nomor_whatsapp' => '',
+            'email' => '',
+            'jenis_pengguna' => 'Individu',
+            'nama_panggilan' => '',
+            'jenis_kelamin' => '',
+            'tanggal_lahir' => '',
+            'hp_lain' => '',
+            'pekerjaan' => '',
+            'wilayah' => '',
+            'alamat_lengkap' => '',
+            'catatan_internal' => '',
+            'username' => '',
+            'password' => '',
+            'api_key' => '',
+        ];
+    }
+    
     return view('superadmin.users.edit', compact('user'));
 })->name('superadmin.users.edit');
 Route::put('/superadmin/users/{id}', function ($id) {

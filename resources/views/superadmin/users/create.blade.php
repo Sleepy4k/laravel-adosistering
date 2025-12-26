@@ -43,20 +43,31 @@
             </div>
         @endif
 
-        <!-- Header Section -->
+        <!-- Header Section with Title and Action Buttons -->
+        <div class="mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h1 class="text-2xl font-bold text-[#4F4F4F]">Tambah Pengguna</h1>
+                <div class="flex items-center gap-3">
+                    <!-- Kirim Kredensial WA Button -->
+                    <button type="button" @click="showKredensialModal = true"
+                        class="btn-3d-green inline-flex items-center gap-4">
+                        <img src="{{ asset('assets/icons/chat.svg') }}" alt="Chat Icon" class="w-5 h-5">
+                        <span>Kirim Kredensial (WA)</span>
+                    </button>
 
-        <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-4 mb-6">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-[#4F4F4F]">Beranda</h1>
-                <p class="text-sm text-gray-500" x-data="{ currentDate: '' }" x-init="const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                const now = new Date();
-                currentDate = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();" x-text="currentDate"></p>
+                    <!-- Edit Button (toggle form editability for create) -->
+                    <button type="button" @click="isEditing = !isEditing" :class="isEditing ? 'btn-3d-blue' : 'btn-3d-red'"
+                        class="inline-flex items-center gap-4">
+                        <img src="{{ asset('assets/icons/edit.svg') }}" alt="Edit Icon" class="w-5 h-5">
+                        <span x-text="isEditing ? 'Edit' : 'Batal Edit'"></span>
+                    </button>
+                </div>
             </div>
         </div>
         <div>
             <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-base hover:text-primary-color transition-colors">Beranda</a>
+                <a href="{{ route('superadmin.dashboard') }}"
+                    class="text-base hover:text-primary-color transition-colors">Beranda</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -180,28 +191,6 @@
                                 <p class="form-error">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        <!-- Password -->
-                        <div>
-                            <label for="password" class="form-label">Password</label>
-                            <div class="relative" x-data="{ showPassword: false }">
-                                <input :type="showPassword ? 'text' : 'password'" id="password" name="password" 
-                                    x-model="formData.password"
-                                    placeholder="Masukkan password"
-                                    class="form-input pr-12 @error('password') error @enderror" required>
-                                <button type="button" @click="showPassword = !showPassword"
-                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
-                                    <span class="relative w-5 h-5">
-                                        <img x-show="!showPassword" src="{{ asset('assets/icons/eye_on.svg') }}" alt="Show Password" class="w-5 h-5 absolute inset-0">
-                                        <img x-show="showPassword" src="{{ asset('assets/icons/eye_off.svg') }}" alt="Hide Password" class="w-5 h-5 absolute inset-0">
-                                    </span>
-                                </button>
-                            </div>
-                            <p class="form-helper">Password untuk login pengguna (min. 8 karakter)</p>
-                            @error('password')
-                                <p class="form-error">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
                 </div>
             </div>
@@ -290,6 +279,20 @@
                             <input type="text" id="hp_lain" name="hp_lain" x-model="formData.hp_lain"
                                 placeholder="08xxxxxxxxx" class="form-input">
                         </div>
+
+                        <!-- Pekerjaan/Profesi -->
+                        <div>
+                            <label for="pekerjaan" class="form-label">Pekerjaan/Profesi</label>
+                            <input type="text" id="pekerjaan" name="pekerjaan" x-model="formData.pekerjaan"
+                                placeholder="Masukkan pekerjaan/profesi" class="form-input">
+                        </div>
+
+                        <!-- Wilayah/Domisili -->
+                        <div>
+                            <label for="wilayah" class="form-label">Wilayah/Domisili</label>
+                            <input type="text" id="wilayah" name="wilayah" x-model="formData.wilayah"
+                                placeholder="Masukkan wilayah/domisili" class="form-input">
+                        </div>
                     </div>
 
                     <!-- Alamat Lengkap -->
@@ -298,18 +301,106 @@
                         <textarea id="alamat_lengkap" name="alamat_lengkap" x-model="formData.alamat_lengkap" rows="4"
                             placeholder="Masukkan alamat lengkap..." class="form-input form-textarea resize-none"></textarea>
                     </div>
+
+                    <!-- Catatan Internal -->
+                    <div class="mt-6">
+                        <label for="catatan_internal" class="form-label">Catatan Internal</label>
+                        <textarea id="catatan_internal" name="catatan_internal" x-model="formData.catatan_internal" rows="4"
+                            placeholder="Masukkan catatan internal" class="form-input form-textarea resize-none"></textarea>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Kredensial -->
+            <div class="bg-white rounded-2xl border border-[#C2C2C2] overflow-hidden">
+                <!-- Header Kredensial -->
+                <div class="flex items-center justify-between px-6 py-4 cursor-pointer"
+                    @click="kredensialOpen = !kredensialOpen">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 flex items-center justify-center">
+                            <img src="{{ asset('assets/icons/kredensial.svg') }}" alt="Kredensial Icon" class="w-5 h-6">
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-[#4F4F4F]">Kredensial</h3>
+                            <p class="text-sm text-gray-500">Data kredensial pengguna</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                        :class="kredensialOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+
+                <!-- Content Kredensial -->
+                <div x-show="kredensialOpen" x-transition:enter="transition-all duration-300 ease-out"
+                    x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen"
+                    x-transition:leave="transition-all duration-200 ease-in"
+                    x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0"
+                    class="px-6 pb-6 space-y-6 overflow-hidden">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Username -->
+                        <div>
+                            <label for="username" class="form-label">Username</label>
+                            <div class="relative">
+                                <input type="text" id="username" name="username" x-model="formData.username"
+                                    placeholder="Username pengguna untuk mengakses alat" class="form-input pr-12"
+                                    readonly>
+                            </div>
+                            <p class="form-helper">Username pengguna untuk mengakses alat</p>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="form-label">Password</label>
+                            <div class="relative">
+                                <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
+                                    x-model="formData.password" placeholder="Masukkan password"
+                                    class="form-input pr-12 @error('password') error @enderror" required>
+                                <button type="button" @click="showPassword = !showPassword"
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                                    <span class="relative w-5 h-5">
+                                        <img x-show="!showPassword" src="{{ asset('assets/icons/eye_on.svg') }}"
+                                            alt="Show Password" class="w-5 h-5 absolute inset-0">
+                                        <img x-show="showPassword" src="{{ asset('assets/icons/eye_off.svg') }}"
+                                            alt="Hide Password" class="w-5 h-5 absolute inset-0">
+                                    </span>
+                                </button>
+                            </div>
+                            <p class="form-helper">Password untuk login pengguna (min. 8 karakter)</p>
+                            @error('password')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- API Key -->
+                    <div class="mt-6">
+                        <label for="api_key" class="form-label">API Key</label>
+                        <div class="relative">
+                            <input type="text" id="api_key" name="api_key" x-model="formData.api_key"
+                                placeholder="b4c0f8a3-79f9-4a5f-8d8e-1a5b2c3d4e5f" class="form-input pr-12" readonly>
+                            <button type="button" @click="copyApiKey()"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                                <img src="{{ asset('assets/icons/copy.svg') }}" alt="Copy" class="w-5 h-5">
+                            </button>
+                        </div>
+                        <p class="form-helper">API Key untuk diterapkan pada alat pengguna</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center justify-end space-x-3 pt-4">
-                <button type="button" @click="resetForm()"
-                    class="px-8 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors duration-200">
-                    Reset
-                </button>
+            <div class="flex items-center justify-start space-x-3 pt-4">
                 <button type="submit"
                     class="btn-3d-green px-8 py-3 font-medium rounded-xl transition-colors duration-200">
                     Simpan Pengguna
+                </button>
+                <button type="button" @click="resetForm()"
+                    class="px-8 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                    Batal
                 </button>
             </div>
         </form>
@@ -359,22 +450,21 @@
                                 @click="selectUser(user)">
                                 <div class="flex items-center gap-3">
                                     <!-- Avatar -->
-                                    <img :src="user.profileImage || '{{ asset('assets/images/default-avatar.jpg') }}'" 
-                                         :alt="user.nama"
-                                         class="w-10 h-10 rounded-full object-cover">
-                                    
+                                    <img :src="user.profileImage || '{{ asset('assets/images/default-avatar.jpg') }}'"
+                                        :alt="user.nama" class="w-10 h-10 rounded-full object-cover">
+
                                     <!-- User Info -->
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-medium text-gray-900 truncate" x-text="user.nama"></h4>
                                         <p class="text-sm text-gray-500" x-text="user.whatsapp + ' · ' + user.email"></p>
                                     </div>
-                                    
+
                                     <!-- Jenis Badge -->
                                     <span class="text-xs text-gray-400" x-text="user.jenis"></span>
                                 </div>
                             </div>
                         </template>
-                        
+
                         <!-- Empty State -->
                         <template x-if="filteredUsers.length === 0">
                             <div class="px-6 py-8 text-center">
@@ -398,6 +488,7 @@
             return {
                 dataWajibOpen: true,
                 dataOpsionalOpen: false,
+                kredensialOpen: false,
                 showUserModal: false,
                 searchUser: '',
                 formData: {
@@ -410,8 +501,15 @@
                     jenis_kelamin: '',
                     tanggal_lahir: '',
                     hp_lain: '',
-                    alamat_lengkap: ''
+                    alamat_lengkap: '',
+                    pekerjaan: '',
+                    wilayah: '',
+                    catatan_internal: '',
+                    username: '',
+                    api_key: ''
                 },
+                showPassword: false,
+                isEditing: true,
                 dummyUsers: [{
                         id: 1,
                         nama: 'Budi Santoso',
@@ -478,12 +576,31 @@
                         nomor_whatsapp: '',
                         email: '',
                         jenis_pengguna: '',
+                        password: '',
                         nama_panggilan: '',
                         jenis_kelamin: '',
                         tanggal_lahir: '',
                         hp_lain: '',
-                        alamat_lengkap: ''
+                        alamat_lengkap: '',
+                        pekerjaan: '',
+                        wilayah: '',
+                        catatan_internal: '',
+                        username: '',
+                        api_key: ''
                     };
+                },
+
+                copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        // Optional: show toast notification
+                        alert('Berhasil disalin!');
+                    }).catch(err => {
+                        console.error('Gagal menyalin: ', err);
+                    });
+                },
+
+                copyApiKey() {
+                    this.copyToClipboard(this.formData.api_key);
                 }
             }
         }

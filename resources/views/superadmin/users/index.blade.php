@@ -443,59 +443,8 @@
                     type: 'success'
                 },
                 
-                // Sample data - akan diganti dengan data dari backend
-                users: [
-                    {
-                        id: 1,
-                        name: 'Budi Santoso',
-                        email: 'budi.santoso@gmail.com',
-                        whatsapp: '081234567890',
-                        role: 'petani',
-                        password: 'password123',
-                        status: 'aktif',
-                        profileImage: null
-                    },
-                    {
-                        id: 2,
-                        name: 'Siti Nurhaliza',
-                        email: 'siti.nurhaliza@gmail.com',
-                        whatsapp: '081234567891',
-                        role: 'petani',
-                        password: 'password123',
-                        status: 'aktif',
-                        profileImage: null
-                    },
-                    {
-                        id: 3,
-                        name: 'Ahmad Wijaya',
-                        email: 'ahmad.wijaya@gmail.com',
-                        whatsapp: '081234567892',
-                        role: 'admin',
-                        password: 'password123',
-                        status: 'nonaktif',
-                        profileImage: null
-                    },
-                    {
-                        id: 4,
-                        name: 'Dewi Lestari',
-                        email: 'dewi.lestari@gmail.com',
-                        whatsapp: '081234567893',
-                        role: 'petani',
-                        password: 'password123',
-                        status: 'aktif',
-                        profileImage: null
-                    },
-                    {
-                        id: 5,
-                        name: 'Eko Prasetyo',
-                        email: 'eko.prasetyo@gmail.com',
-                        whatsapp: '081234567894',
-                        role: 'superadmin',
-                        password: 'password123',
-                        status: 'aktif',
-                        profileImage: null
-                    },
-                ],
+                // Data dari backend melalui Blade
+                users: @json($users ?? []),
 
                 showNotificationMessage(message, type = 'success') {
                     this.notification.message = message;

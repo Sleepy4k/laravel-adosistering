@@ -17,7 +17,7 @@ return [
         [
             'label' => 'Profil',
             'icon' => 'profile.svg',
-            'route' => '#',
+            'route' => 'user.profile',
             'active' => 'user.profile*',
         ],
         [

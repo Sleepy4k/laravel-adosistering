@@ -1,19 +1,5 @@
 
-<div class="bg-white rounded-2xl border border-[#E0E0E0] py-4 px-6 mb-6"
-     x-data="{
-        namaLahan: '',
-        statusIrigasi: '',
-        jenisIrigasi: '',
-        reset() {
-            this.namaLahan = '';
-            this.statusIrigasi = '';
-            this.jenisIrigasi = '';
-        }
-     }"
-     x-init="$watch('namaLahan', () => $dispatch('filter-updated', {namaLahan, statusIrigasi, jenisIrigasi}));
-             $watch('statusIrigasi', () => $dispatch('filter-updated', {namaLahan, statusIrigasi, jenisIrigasi}));
-             $watch('jenisIrigasi', () => $dispatch('filter-updated', {namaLahan, statusIrigasi, jenisIrigasi}));"
->
+<div class="bg-white rounded-2xl border border-[#E0E0E0] py-4 px-6 mb-6">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div class="flex flex-col sm:flex-row gap-4 flex-1 w-full">
             <!-- Nama Lahan Filter (Dropdown Custom, warna iot-filter) -->
@@ -69,18 +55,22 @@
                     </div>
                 </div>
             </div>
-            <!-- Hapus search box, penuhkan filter ke kanan -->
+            <!-- Tanggal Filter (Input Date) -->
+            <div class="flex flex-col gap-2 flex-1 min-w-0">
+                <label class="text-sm font-medium text-[#4F4F4F]">Tanggal</label>
+                <input 
+                    type="date" 
+                    x-model="tanggalFilter"
+                    class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    style="color-scheme: light;"
+                />
+            </div>
             <!-- Tombol Reset -->
             <div class="flex flex-col gap-2 justify-end">
-                <button class="h-11 px-6 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-100 transition-colors flex items-center gap-2" type="button" @click="reset(); $dispatch('filter-updated', {namaLahan, statusIrigasi, jenisIrigasi})">
+                <button class="h-11 px-6 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-100 transition-colors flex items-center gap-2" type="button" @click="reset()">
                     <img src="/assets/icons/reset.svg" alt="Reset" class="w-4 h-4"> Reset
                 </button>
             </div>
         </div>
     </div>
 </div>
-<script>
-function resetFilters() {
-    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-}
-</script>

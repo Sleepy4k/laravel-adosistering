@@ -67,7 +67,7 @@ class AuthController extends Controller
         ]);
 
         // Dummy credentials untuk admin
-        if ($request->username === 'admin' && $request->password === 'admin123') {
+        if ($request->username === 'admin' && $request->password === 'password123') {
             $request->session()->put('dummy_auth', [
                 'user_id' => 2,
                 'role' => 'admin',
@@ -93,7 +93,7 @@ class AuthController extends Controller
         ]);
 
         // Dummy credentials untuk superadmin
-        if ($request->username === 'superadmin' && $request->password === 'super123') {
+        if ($request->username === 'superadmin' && $request->password === 'password123') {
             $request->session()->put('dummy_auth', [
                 'user_id' => 3,
                 'role' => 'superadmin',

@@ -31,66 +31,17 @@
             <x-user.iot-irrigation-map-editable />
         </div>
 
-        <!-- Block Cards with Accordion -->
-        <x-user.block-accordion-card blockId="A" blockName="Blok A" avgHumidity="47,38%"
-            avgFlowRate="38,57 Liter / Menit" totalVolume="78 Liter" :sprayers="[
-                [
-                    'id' => '1',
-                    'name' => 'Sprayer 1',
-                    'location' => 'Desa Mernek, Kecamatan Maos, Kabupaten Cilacap, Jawa Tengah',
-                    'sensorStatus' => 'Terhubung',
-                    'humidity' => '47,38%',
-                    'flowRate' => '33 L / Menit',
-                    'volume' => '78 Liter',
-                    'pumpStatus' => 'Aktif',
-                    'lastUpdate' => '5 menit yang lalu',
-                    'isPumpOn' => true,
-                    'isAutoIrrigation' => false,
-                ],
-                [
-                    'id' => '2',
-                    'name' => 'Sprayer 2',
-                    'location' => 'Desa Mernek, Kecamatan Maos, Kabupaten Cilacap, Jawa Tengah',
-                    'sensorStatus' => 'Gangguan Sensor',
-                    'humidity' => '47,38%',
-                    'flowRate' => '33 L / Menit',
-                    'volume' => '78 Liter',
-                    'pumpStatus' => 'Mati',
-                    'lastUpdate' => '5 menit yang lalu',
-                    'isPumpOn' => false,
-                    'isAutoIrrigation' => false,
-                ],
-            ]" />
-
-        <x-user.block-accordion-card blockId="B" blockName="Blok B" avgHumidity="52,15%"
-            avgFlowRate="35,20 Liter / Menit" totalVolume="65 Liter" :sprayers="[
-                [
-                    'id' => '3',
-                    'name' => 'Sprayer 1',
-                    'location' => 'Desa Mernek, Kecamatan Maos, Kabupaten Cilacap, Jawa Tengah',
-                    'sensorStatus' => 'Terhubung',
-                    'humidity' => '52,15%',
-                    'flowRate' => '35 L / Menit',
-                    'volume' => '65 Liter',
-                    'pumpStatus' => 'Mati',
-                    'lastUpdate' => '3 menit yang lalu',
-                    'isPumpOn' => false,
-                    'isAutoIrrigation' => false,
-                ],
-                [
-                    'id' => '4',
-                    'name' => 'Sprayer 2',
-                    'location' => 'Desa Mernek, Kecamatan Maos, Kabupaten Cilacap, Jawa Tengah',
-                    'sensorStatus' => 'Terhubung',
-                    'humidity' => '52,15%',
-                    'flowRate' => '35 L / Menit',
-                    'volume' => '65 Liter',
-                    'pumpStatus' => 'Mati',
-                    'lastUpdate' => '3 menit yang lalu',
-                    'isPumpOn' => false,
-                    'isAutoIrrigation' => false,
-                ],
-            ]" />
+        <!-- Block Cards with Accordion (Dynamic from config) -->
+        @foreach($blocks as $block)
+            <x-user.block-accordion-card 
+                :blockId="$block['blockId']" 
+                :blockName="$block['blockName']" 
+                :avgHumidity="$block['avgHumidity']"
+                :avgFlowRate="$block['avgFlowRate']" 
+                :totalVolume="$block['totalVolume']" 
+                :sprayers="$block['sprayers']" 
+            />
+        @endforeach
 
     </div>
 
