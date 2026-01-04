@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\UserType;
 use Illuminate\Database\Seeder;
 
 class UserTypeSeeder extends Seeder
@@ -12,6 +12,10 @@ class UserTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (UserType::query()->withoutCache()->count() > 0) return;
+
+        $types = UserType::factory()->make();
+
+        UserType::query()->insert($types->toArray());
     }
 }

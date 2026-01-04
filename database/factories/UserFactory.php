@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\UserType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,10 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $typeId = UserType::query()
+            ->where('name', 'Individu')
+            ->value('id');
+
         $data = [
             [
                 'name' => 'Superadmin User',
@@ -52,10 +57,11 @@ class UserFactory extends Factory
 
         foreach ($data as $index => &$entry) {
             $entry = array_merge([
-                'password' => static::$password ??= 'password',
+                'password' => static::$password ??= 'password123',
             ], $entry);
 
             $entry['id'] = $uuids[$index];
+            $entry['user_type_id'] = $typeId;
             $entry['created_at'] = $currentTime;
             $entry['updated_at'] = $currentTime;
         }

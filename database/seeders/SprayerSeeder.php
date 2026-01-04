@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Sprayer;
 use Illuminate\Database\Seeder;
 
 class SprayerSeeder extends Seeder
@@ -12,6 +12,10 @@ class SprayerSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (Sprayer::query()->withoutCache()->count() > 0) return;
+
+        $sprayers = Sprayer::factory()->make();
+
+        Sprayer::query()->insert($sprayers->toArray());
     }
 }

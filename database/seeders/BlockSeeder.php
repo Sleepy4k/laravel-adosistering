@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Block;
 use Illuminate\Database\Seeder;
 
 class BlockSeeder extends Seeder
@@ -12,6 +12,10 @@ class BlockSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (Block::query()->withoutCache()->count() > 0) return;
+
+        $blocks = Block::factory()->make();
+
+        Block::query()->insert($blocks->toArray());
     }
 }

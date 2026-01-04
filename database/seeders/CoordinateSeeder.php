@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Coordinate;
 use Illuminate\Database\Seeder;
 
 class CoordinateSeeder extends Seeder
@@ -12,6 +12,10 @@ class CoordinateSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (Coordinate::query()->withoutCache()->count() > 0) return;
+
+        $coordinates = Coordinate::factory()->make();
+
+        Coordinate::query()->insert($coordinates->toArray());
     }
 }

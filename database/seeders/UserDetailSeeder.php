@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\UserDetail;
 use Illuminate\Database\Seeder;
 
 class UserDetailSeeder extends Seeder
@@ -12,6 +12,10 @@ class UserDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (UserDetail::query()->withoutCache()->count() > 0) return;
+
+        $details = UserDetail::factory()->make();
+
+        UserDetail::query()->insert($details->toArray());
     }
 }

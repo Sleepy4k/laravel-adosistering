@@ -15,6 +15,8 @@ return new class extends Migration
         Schema::create('coordinates', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignIdFor(Block::class)->constrained()->cascadeOnDelete();
+            $table->string('marker')->nullable();
+            $table->string('color')->nullable();
             $table->json('points');
             $table->timestamps();
         });

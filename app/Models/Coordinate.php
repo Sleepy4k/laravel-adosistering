@@ -19,6 +19,8 @@ class Coordinate extends Model
      */
     protected $fillable = [
         'block_id',
+        'marker',
+        'color',
         'points',
     ];
 
@@ -39,6 +41,8 @@ class Coordinate extends Model
         return [
             'id' => 'string',
             'block_id' => 'string',
+            'marker' => 'string',
+            'color' => 'string',
             'points' => 'array',
         ];
     }

@@ -24,7 +24,14 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             SidebarMenuSeeder::class,
+            UserTypeSeeder::class,
             UserSeeder::class,
+            UserDetailSeeder::class,
+            UserApiSeeder::class,
+            BlockSeeder::class,
+            CoordinateSeeder::class,
+            SprayerSeeder::class,
+            SensorSeeder::class,
         ]);
     }
 }
