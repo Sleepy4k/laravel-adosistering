@@ -18,8 +18,14 @@ class AddSecureHeaderRequest
     {
         $response = $next($request);
 
-        $permissions = (new PermissionPolicy())->configure();
-        $response->headers->set('Permissions-Policy', $permissions, true);
+        if (!config('secure-headers.enable.permissions')) {
+            $permissions = (new PermissionPolicy())->configure();
+            $response->headers->set('Permissions-Policy', $permissions, true);
+        }
+
+        if (!config('secure-headers.enable.headers')) {
+            return $response;
+        }
 
         foreach (config('secure-headers.headers') as $key => $value) {
             if (empty($value)) continue;

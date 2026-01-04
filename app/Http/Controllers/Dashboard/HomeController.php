@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Foundations\Controller;
+use App\Services\Dashboard\HomeService;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -10,9 +11,8 @@ class HomeController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(HomeService $service, Request $request)
     {
-        $blocks = config('dummy.blocks');
-        return view('pages.dashboard.home', compact('blocks'));
+        return view('pages.dashboard.home', $service->invoke());
     }
 }

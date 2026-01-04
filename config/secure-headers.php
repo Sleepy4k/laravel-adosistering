@@ -2,6 +2,11 @@
 
 return [
 
+    'enable' => [
+        'headers' => env('SECURE_HEADERS_ENABLED', false),
+        'permissions' => env('PERMISSIONS_POLICY_ENABLED', false),
+    ],
+
     'headers' => [
         /**
          * Server
