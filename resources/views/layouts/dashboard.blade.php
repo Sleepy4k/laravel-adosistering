@@ -9,6 +9,11 @@
     <!-- Vite CSS Build -->
     @vite('resources/css/app.css')
     
+    <!-- Alpine.js Cloak - Hide elements until Alpine initializes -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    
     @stack('styles')
 </head>
 <body class="antialiased" x-data="{ sidebarOpen: true }">

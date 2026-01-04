@@ -5,62 +5,55 @@
 @section('content')
     <div class="max-w-7xl mx-auto" x-data="manajemenUser()">
 
-        <!-- Flash Messages from Backend -->
-        @if (session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6" role="alert">
-                <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
+        <!-- Success Notification Modal -->
+        <div x-show="showSuccessModal" 
+            x-cloak
+            class="fixed inset-0 z-50 overflow-y-auto" 
+            aria-labelledby="success-modal-title" 
+            role="dialog" 
+            aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Background overlay -->
+                <div x-show="showSuccessModal"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 bg-black/50 transition-opacity"
+                    @click="showSuccessModal = false"></div>
 
-        @if (session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6" role="alert">
-                <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
+                <!-- Hidden element for centering -->
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <!-- Alpine.js Flash Messages -->
-        <div x-show="notification.show" 
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform -translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform -translate-y-2"
-            class="rounded-xl mb-6 px-4 py-3" 
-            :class="notification.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'"
-            role="alert"
-            style="display: none;">
-            <div class="flex items-center">
-                <div class="shrink-0">
-                    <svg x-show="notification.type === 'success'" class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <svg x-show="notification.type === 'error'" class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium" x-text="notification.message"></p>
+                <!-- Modal panel -->
+                <div x-show="showSuccessModal"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    
+                    <div class="text-center">
+                        <!-- Success Icon -->
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-4">
+                            <svg class="h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-[#4F4F4F] mb-2" x-text="successTitle"></h3>
+                        <p class="text-sm text-gray-500 mb-6" x-text="successMessage"></p>
+                    </div>
+
+                    <button type="button" 
+                        @click="showSuccessModal = false"
+                        class="btn-3d-green w-full text-center justify-center">
+                        Tutup
+                    </button>
                 </div>
             </div>
         </div>
@@ -311,11 +304,21 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    
+                    <!-- Close Button -->
+                    <button type="button" 
+                        @click="showDeleteModal = false"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     
                     <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- Warning Icon -->
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-amber-100 mb-4">
+                            <svg class="h-10 w-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                             </svg>
                         </div>
@@ -326,18 +329,18 @@
                         </p>
                     </div>
 
-                    <div class="flex items-center justify-center gap-3">
-                        <button type="button" 
-                            @click="showDeleteModal = false"
-                            class="px-6 py-3 border border-[#C2C2C2] rounded-xl text-sm font-medium text-[#4F4F4F] hover:bg-gray-50 transition-colors">
-                            Batal
-                        </button>
-                        <button type="button" @click="deleteUser()" class="btn-3d-red inline-flex items-center gap-2">
+                    <div class="flex items-center gap-3">
+                        <button type="button" @click="deleteUser()" class="btn-3d-red flex-1 text-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                                <span>Ya, Hapus</span>
-                            </button>
+                            </svg>
+                            <span>Ya, Hapus</span>
+                        </button>
+                        <button type="button" 
+                            @click="showDeleteModal = false"
+                            class="btn-3d-green flex-1 text-center justify-center">
+                            Batal
+                        </button>
                     </div>
                 </div>
             </div>
@@ -373,17 +376,22 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    
+                    <!-- Close Button -->
+                    <button type="button" 
+                        @click="showStatusModal = false"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     
                     <div class="text-center">
-                        <!-- Icon based on action -->
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4"
-                            :class="userToToggle?.status === 'aktif' ? 'bg-amber-100' : 'bg-emerald-100'">
-                            <svg x-show="userToToggle?.status === 'aktif'" class="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                            </svg>
-                            <svg x-show="userToToggle?.status !== 'aktif'" class="h-8 w-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <!-- Warning Icon -->
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-amber-100 mb-4">
+                            <svg class="h-10 w-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-[#4F4F4F] mb-2" x-text="userToToggle?.status === 'aktif' ? 'Nonaktifkan User' : 'Aktifkan User'"></h3>
@@ -399,22 +407,34 @@
                         </p>
                     </div>
 
-                    <div class="flex items-center justify-center gap-3">
-                        <button type="button" 
-                            @click="showStatusModal = false"
-                            class="px-6 py-3 border border-[#C2C2C2] rounded-xl text-sm font-medium text-[#4F4F4F] hover:bg-gray-50 transition-colors">
-                            Batal
-                        </button>
+                    <div class="flex items-center gap-3">
                         <button type="button" @click="toggleStatus()"
-                            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-white transition-colors"
-                            :class="userToToggle?.status === 'aktif' ? 'bg-amber-500 hover:bg-amber-600 shadow-[0_4px_0_0_#b45309]' : 'bg-emerald-500 hover:bg-emerald-600 shadow-[0_4px_0_0_#047857]'">
-                            <svg x-show="userToToggle?.status === 'aktif'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="btn-3d-red flex-1 text-center justify-center"
+                            x-show="userToToggle?.status === 'aktif'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                             </svg>
-                            <svg x-show="userToToggle?.status !== 'aktif'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                            <span>Ya, Nonaktifkan</span>
+                        </button>
+                        <button type="button" @click="toggleStatus()"
+                            class="btn-3d-green flex-1 text-center justify-center"
+                            x-show="userToToggle?.status !== 'aktif'" style="display: none;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span x-text="userToToggle?.status === 'aktif' ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan'"></span>
+                            <span>Ya, Aktifkan</span>
+                        </button>
+                        <button type="button" 
+                            @click="showStatusModal = false"
+                            class="btn-3d-green flex-1 text-center justify-center"
+                            x-show="userToToggle?.status === 'aktif'">
+                            Batal
+                        </button>
+                        <button type="button" 
+                            @click="showStatusModal = false"
+                            class="btn-3d-red flex-1 text-center justify-center"
+                            x-show="userToToggle?.status !== 'aktif'" style="display: none;">
+                            Batal
                         </button>
                     </div>
                 </div>
@@ -433,27 +453,21 @@
                 perPage: 10,
                 showDeleteModal: false,
                 showStatusModal: false,
+                showSuccessModal: false,
+                successTitle: '',
+                successMessage: '',
                 userToDelete: null,
                 userToToggle: null,
                 deleteUrl: '',
                 toggleStatusUrl: '',
-                notification: {
-                    show: false,
-                    message: '',
-                    type: 'success'
-                },
                 
                 // Data dari backend melalui Blade
                 users: @json($users ?? []),
 
-                showNotificationMessage(message, type = 'success') {
-                    this.notification.message = message;
-                    this.notification.type = type;
-                    this.notification.show = true;
-                    
-                    setTimeout(() => {
-                        this.notification.show = false;
-                    }, 4000);
+                showSuccessNotification(title, message) {
+                    this.successTitle = title;
+                    this.successMessage = message;
+                    this.showSuccessModal = true;
                 },
 
                 get filteredUsers() {
@@ -499,8 +513,8 @@
                         this.showDeleteModal = false;
                         this.userToDelete = null;
                         
-                        // Show notification
-                        this.showNotificationMessage('User ' + userName + ' berhasil dihapus!', 'success');
+                        // Show success modal
+                        this.showSuccessNotification('Berhasil!', 'User ' + userName + ' berhasil dihapus.');
                     }
                 },
 
@@ -524,9 +538,9 @@
                         this.showStatusModal = false;
                         this.userToToggle = null;
                         
-                        // Show notification
+                        // Show success modal
                         const statusText = newStatus === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
-                        this.showNotificationMessage('User ' + userName + ' berhasil ' + statusText + '!', 'success');
+                        this.showSuccessNotification('Berhasil!', 'User ' + userName + ' berhasil ' + statusText + '.');
                     }
                 }
             }

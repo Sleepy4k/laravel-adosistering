@@ -5,66 +5,6 @@
 @section('content')
     <div class="max-w-7xl mx-auto" x-data="manajemenUser()">
 
-        <!-- Flash Messages from Backend -->
-        @if (session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6" role="alert">
-                <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6" role="alert">
-                <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Alpine.js Flash Messages -->
-        <div x-show="notification.show" 
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform -translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform -translate-y-2"
-            class="rounded-xl mb-6 px-4 py-3" 
-            :class="notification.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'"
-            role="alert"
-            style="display: none;">
-            <div class="flex items-center">
-                <div class="shrink-0">
-                    <svg x-show="notification.type === 'success'" class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <svg x-show="notification.type === 'error'" class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium" x-text="notification.message"></p>
-                </div>
-            </div>
-        </div>
-
         <!-- Header Section with Title -->
         <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-6 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -254,62 +194,118 @@
         <!-- Delete Confirmation Modal -->
         <div x-show="showDeleteModal" 
             x-cloak
-            class="fixed inset-0 z-50 overflow-y-auto" 
-            aria-labelledby="modal-title" 
-            role="dialog" 
-            aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Background overlay -->
-                <div x-show="showDeleteModal"
-                    x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100"
-                    x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    class="fixed inset-0 bg-black/50 transition-opacity"
-                    @click="showDeleteModal = false"></div>
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            @click.self="showDeleteModal = false"
+            style="display: none;">
+            
+            <div x-show="showDeleteModal"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-8 relative text-center">
+                
+                <!-- Close Button -->
+                <button 
+                    @click="showDeleteModal = false"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
 
-                <!-- Hidden element for centering -->
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <!-- Modal panel -->
-                <div x-show="showDeleteModal"
-                    x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    
-                    <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-[#4F4F4F] mb-2">Hapus User</h3>
-                        <p class="text-sm text-gray-500 mb-6">
-                            Apakah Anda yakin ingin menghapus user <strong x-text="userToDelete?.name"></strong>? 
-                            Tindakan ini tidak dapat dibatalkan.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-3">
-                        <button type="button" 
-                            @click="showDeleteModal = false"
-                            class="px-6 py-3 border border-[#C2C2C2] rounded-xl text-sm font-medium text-[#4F4F4F] hover:bg-gray-50 transition-colors">
-                            Batal
-                        </button>
-                        <button type="button" @click="deleteUser()" class="btn-3d-red inline-flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                            <span>Ya, Hapus</span>
-                        </button>
+                <!-- Warning Icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
                     </div>
                 </div>
+
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-[#4F4F4F] mb-2">Anda Sudah Yakin ?</h3>
+                
+                <!-- Message -->
+                <p class="text-sm text-gray-500 mb-6">
+                    Anda akan menghapus pengguna <strong x-text="userToDelete?.name"></strong>. Tindakan ini tidak dapat dibatalkan.
+                </p>
+
+                <!-- Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" 
+                        @click="deleteUser()"
+                        class="btn-3d-green w-full h-12 text-sm">
+                        Saya Yakin
+                    </button>
+                    <button type="button" 
+                        @click="showDeleteModal = false"
+                        class="w-full h-12 bg-white border border-[#C2C2C2] text-[#4F4F4F] rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Notification Modal -->
+        <div x-show="showSuccessModal" 
+            x-cloak
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            style="display: none;">
+            
+            <div x-show="showSuccessModal"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-8 relative text-center">
+                
+                <!-- Close Button -->
+                <button 
+                    @click="showSuccessModal = false"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+
+                <!-- Success Icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-[#4F4F4F] mb-2" x-text="successTitle"></h3>
+                
+                <!-- Message -->
+                <p class="text-sm text-gray-500 mb-6" x-text="successMessage"></p>
+
+                <!-- Button -->
+                <button 
+                    @click="showSuccessModal = false"
+                    class="w-full h-12 bg-primary text-white rounded-xl text-base font-medium hover:bg-primary-dark transition-colors">
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -324,6 +320,9 @@
                 currentPage: 1,
                 perPage: 10,
                 showDeleteModal: false,
+                showSuccessModal: false,
+                successTitle: '',
+                successMessage: '',
                 userToDelete: null,
                 deleteUrl: '',
                 notification: {
@@ -364,15 +363,10 @@
                     this.currentPage = 1;
                 },
 
-                showNotification(type, message) {
-                    this.notification.type = type;
-                    this.notification.message = message;
-                    this.notification.show = true;
-                    
-                    // Auto hide after 5 seconds
-                    setTimeout(() => {
-                        this.notification.show = false;
-                    }, 5000);
+                showSuccess(title, message) {
+                    this.successTitle = title;
+                    this.successMessage = message;
+                    this.showSuccessModal = true;
                 },
 
                 confirmDelete(user) {
@@ -389,8 +383,8 @@
                         this.showDeleteModal = false;
                         this.userToDelete = null;
                         
-                        // Show notification
-                        this.showNotification('success', `Pengguna ${userName} berhasil dihapus!`);
+                        // Show success modal
+                        this.showSuccess('Berhasil Menghapus Pengguna', `Pengguna ${userName} berhasil dihapus dari sistem.`);
                     }
                 }
             }

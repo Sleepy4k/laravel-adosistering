@@ -4,18 +4,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
-// Default route - redirect to user login
+// Default route - redirect to login
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-Route::get('/login', [AuthController::class, 'userLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'handleUserLogin'])->name('login.submit');
-Route::get('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login');
-Route::post('/admin/login', [AuthController::class, 'handleAdminLogin'])->name('admin.login.submit');
-Route::get('/superadmin/login', [AuthController::class, 'superAdminLogin'])->name('superadmin.login');
-Route::post('/superadmin/login', [AuthController::class, 'handleSuperAdminLogin'])->name('superadmin.login.submit');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Unified Login (untuk user, admin, dan superadmin)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.submit');
+Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/user/profile', function () {
     $profile = config('dummy.current_user');
@@ -31,6 +28,34 @@ Route::get('/user/dashboard', function () {
     $blocks = config('dummy.blocks');
     return view('user.dashboard', compact('blocks'));
 })->name('user.dashboard');
+
+Route::get('/user/statistik', function () {
+    $statistikData = include database_path('data/statistik.php');
+    $period = request()->query('period', 'today');
+    
+    // Validate period
+    if (!in_array($period, ['today', '7days', '30days'])) {
+        $period = 'today';
+    }
+    
+    $data = $statistikData[$period];
+    
+    return view('user.statistik', [
+        'summary' => $data['summary'],
+        'bloks' => $data['bloks'],
+        'currentPeriod' => $period,
+    ]);
+})->name('user.statistik');
+
+Route::get('/user/notifications', function () {
+    $notifications = include database_path('data/notifications.php');
+    return view('user.notifications', compact('notifications'));
+})->name('user.notifications');
+
+Route::get('/user/pengaturan', function () {
+    $settings = include database_path('data/settings.php');
+    return view('user.pengaturan', compact('settings'));
+})->name('user.pengaturan');
 
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 

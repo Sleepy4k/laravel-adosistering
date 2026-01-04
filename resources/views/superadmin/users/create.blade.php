@@ -5,22 +5,58 @@
 @section('content')
     <div class="max-w-7xl mx-auto" x-data="tambahPengguna()">
 
-        <!-- Flash Messages -->
-        @if (session('success'))
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6" role="alert">
-                <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+        <!-- Success Notification Modal -->
+        <div x-show="showSuccessModal" 
+            x-cloak
+            class="fixed inset-0 z-50 overflow-y-auto" 
+            aria-labelledby="success-modal-title" 
+            role="dialog" 
+            aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Background overlay -->
+                <div x-show="showSuccessModal"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 bg-black/50 transition-opacity"
+                    @click="showSuccessModal = false"></div>
+
+                <!-- Hidden element for centering -->
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <!-- Modal panel -->
+                <div x-show="showSuccessModal"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    class="relative inline-block align-bottom bg-white rounded-2xl px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    
+                    <div class="text-center">
+                        <!-- Success Icon -->
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-4">
+                            <svg class="h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-[#4F4F4F] mb-2" x-text="successTitle"></h3>
+                        <p class="text-sm text-gray-500 mb-6" x-text="successMessage"></p>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ session('success') }}</p>
-                    </div>
+
+                    <button type="button" 
+                        @click="showSuccessModal = false"
+                        class="btn-3d-green w-full text-center justify-center">
+                        Tutup
+                    </button>
                 </div>
             </div>
-        @endif
+        </div>
 
         @if ($errors->any())
             <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6" role="alert">
@@ -490,6 +526,9 @@
                 dataOpsionalOpen: false,
                 kredensialOpen: false,
                 showUserModal: false,
+                showSuccessModal: false,
+                successTitle: '',
+                successMessage: '',
                 searchUser: '',
                 formData: {
                     nama_pengguna: '',
@@ -601,6 +640,15 @@
 
                 copyApiKey() {
                     this.copyToClipboard(this.formData.api_key);
+                },
+
+                init() {
+                    // Check for session success from Laravel
+                    @if(session('success'))
+                        this.successTitle = 'Berhasil!';
+                        this.successMessage = '{{ session('success') }}';
+                        this.showSuccessModal = true;
+                    @endif
                 }
             }
         }

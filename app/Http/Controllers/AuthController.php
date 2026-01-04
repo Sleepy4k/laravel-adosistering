@@ -3,109 +3,139 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
     /**
-     * Show user login page
+     * Rate limiting configuration
      */
-    public function userLogin()
+    private const MAX_ATTEMPTS = 5; // Maksimal 5 kali percobaan
+    private const DECAY_MINUTES = 1; // Cooldown 1 menit
+
+    /**
+     * Dummy credentials untuk semua role (dibedakan berdasarkan email)
+     */
+    private $credentials = [
+        [
+            'email' => 'user@test.com',
+            'password' => 'password123',
+            'user_id' => 1,
+            'role' => 'user',
+            'name' => 'User Test',
+        ],
+        [
+            'email' => 'admin@test.com',
+            'password' => 'password123',
+            'user_id' => 2,
+            'role' => 'admin',
+            'name' => 'Admin Test',
+        ],
+        [
+            'email' => 'superadmin@test.com',
+            'password' => 'password123',
+            'user_id' => 3,
+            'role' => 'superadmin',
+            'name' => 'Super Admin Test',
+        ],
+    ];
+
+    /**
+     * Show unified login page
+     */
+    public function showLogin(Request $request)
     {
-        return view('auth.user.login');
+        // Cek apakah masih ada countdown yang berjalan dari session
+        $blockedUntil = session('blocked_until', 0);
+        $now = time();
+        
+        if ($blockedUntil > $now) {
+            // Masih dalam periode blocked - tampilkan countdown
+            return view('auth.login', [
+                'isBlocked' => true,
+            ]);
+        }
+        
+        // Countdown sudah selesai atau tidak ada - clear session
+        session()->forget(['blocked_until', 'blocked_email']);
+        
+        return view('auth.login', [
+            'isBlocked' => false,
+        ]);
     }
 
     /**
-     * Show admin login page
+     * Handle login (untuk semua role: user, admin, superadmin)
      */
-    public function adminLogin()
-    {
-        return view('auth.admin.login');
-    }
-
-    /**
-     * Show superadmin login page
-     */
-    public function superAdminLogin()
-    {
-        return view('auth.superadmin.login');
-    }
-
-    /**
-     * Handle user login (dummy authentication)
-     */
-    public function handleUserLogin(Request $request)
+    public function handleLogin(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Dummy credentials untuk user
-        if ($request->username === 'user' && $request->password === 'password123') {
-            $request->session()->put('dummy_auth', [
-                'user_id' => 1,
-                'role' => 'user',
-                'name' => 'User Test',
-                'email' => 'user@test.com',
-                'username' => 'user'
-            ]);
+        $throttleKey = $this->getThrottleKey($request);
 
-            return redirect()->route('user.dashboard')->with('success', 'Berhasil login sebagai User!');
+        // Cek rate limiting SEBELUM proses login
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            session(['blocked_until' => time() + $seconds]);
+            
+            return redirect()->route('login');
         }
 
-        return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
+        // Cari user berdasarkan email
+        $user = collect($this->credentials)->first(function ($cred) use ($request) {
+            return $cred['email'] === $request->email && $cred['password'] === $request->password;
+        });
+
+        if ($user) {
+            // Clear rate limiting setelah login berhasil
+            RateLimiter::clear($throttleKey);
+
+            $request->session()->put('dummy_auth', [
+                'user_id' => $user['user_id'],
+                'role' => $user['role'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+            ]);
+
+            // Redirect berdasarkan role
+            $redirectRoute = match ($user['role']) {
+                'admin' => 'admin.dashboard',
+                'superadmin' => 'superadmin.dashboard',
+                default => 'user.dashboard',
+            };
+
+            return redirect()->route($redirectRoute)
+                ->with('success', 'Berhasil login sebagai ' . ucfirst($user['role']) . '!');
+        }
+
+        // Increment failed attempts SETELAH login gagal
+        RateLimiter::hit($throttleKey, self::DECAY_MINUTES * 60);
+        
+        // Cek apakah SEKARANG sudah terlalu banyak attempts (tepat di percobaan ke-5)
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            session(['blocked_until' => time() + $seconds]);
+            
+            return redirect()->route('login');
+        }
+
+        return back()
+            ->withErrors(['email' => 'Email atau password salah.'])
+            ->withInput();
     }
 
     /**
-     * Handle admin login (dummy authentication)
+     * Get throttle key untuk rate limiting
      */
-    public function handleAdminLogin(Request $request)
+    private function getThrottleKey(Request $request): string
     {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        // Dummy credentials untuk admin
-        if ($request->username === 'admin' && $request->password === 'password123') {
-            $request->session()->put('dummy_auth', [
-                'user_id' => 2,
-                'role' => 'admin',
-                'name' => 'Admin Test',
-                'email' => 'admin@test.com',
-                'username' => 'admin'
-            ]);
-
-            return redirect()->route('admin.dashboard')->with('success', 'Berhasil login sebagai Admin!');
-        }
-
-        return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
-    }
-
-    /**
-     * Handle superadmin login (dummy authentication)
-     */
-    public function handleSuperAdminLogin(Request $request)
-    {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        // Dummy credentials untuk superadmin
-        if ($request->username === 'superadmin' && $request->password === 'password123') {
-            $request->session()->put('dummy_auth', [
-                'user_id' => 3,
-                'role' => 'superadmin',
-                'name' => 'Super Admin Test',
-                'email' => 'superadmin@test.com',
-                'username' => 'superadmin'
-            ]);
-
-            return redirect()->route('superadmin.dashboard')->with('success', 'Berhasil login sebagai Super Admin!');
-        }
-
-        return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
+        $email = $request->input('email', 'guest');
+        $ip = $request->ip();
+        
+        return 'login:' . strtolower($email) . '|' . $ip;
     }
 
     /**
