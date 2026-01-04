@@ -3,12 +3,15 @@
 namespace App\Listeners;
 
 use App\Enums\ActivityEventType;
+use App\Notifications\NewDeviceDetected;
 use hisorange\BrowserDetect\Parser as Browser;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Spatie\Activitylog\Models\Activity;
 
 class UserEventListener
 {
@@ -79,6 +82,27 @@ class UserEventListener
         $properties = $this->getUserProperties($user, [
             'login_at' => now()->toDateTimeString(),
         ]);
+
+        $lastActivity = Activity::select('properties')
+            ->where('log_name', 'auth')
+            ->where('event', ActivityEventType::LOGIN->value)
+            ->where('causer_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($lastActivity && !is_null($lastActivity)) {
+            $lastProperties = $lastActivity->properties;
+
+            if (
+                $lastProperties['device_family'] !== $properties['device_family'] ||
+                $lastProperties['device_model'] !== $properties['device_model'] ||
+                $lastProperties['ip_address'] !== $properties['ip_address']
+            ) {
+                $fullname = $user->personal->full_name;
+                $email = $user->email;
+                Notification::sendNow($user, new NewDeviceDetected($fullname, $email));
+            }
+        }
 
         activity('auth')
             ->event(ActivityEventType::LOGIN->value)

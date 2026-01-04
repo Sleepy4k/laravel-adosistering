@@ -5,19 +5,19 @@ return [
         [
             'label' => 'Beranda',
             'icon' => 'home.svg',
-            'route' => 'user.dashboard',
-            'active' => 'user.dashboard',
+            'route' => 'home',
+            'active' => 'home',
         ],
         [
             'label' => 'Riwayat Irigasi',
             'icon' => 'history.svg',
-            'route' => 'user.history',
+            'route' =>'#',
             'active' => 'user.history*',
         ],
         [
             'label' => 'Profil',
             'icon' => 'profile.svg',
-            'route' => 'user.profile',
+            'route' => '#',
             'active' => 'user.profile*',
         ],
         [
@@ -122,7 +122,7 @@ return [
         [
             'label' => 'Log Out',
             'icon' => 'logout.svg',
-            'route' => '#',
+            'route' => 'logout',
             'active' => 'logout',
             'danger' => true,
         ],

@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -23,22 +22,46 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+        $data = [
+            [
+                'name' => 'Superadmin User',
+                'email' => 'superadmin@test.com',
+                'phone' => '081234567890',
+                'role' => 'superadmin',
+            ],
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@test.com',
+                'phone' => '081234567891',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Regular User',
+                'email' => 'user@test.com',
+                'phone' => '081234567892',
+                'role' => 'user',
+            ],
         ];
-    }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        $currentTime = now();
+        $uuids = collect(range(1, count($data)))
+            ->map(fn() => (string) Str::uuid())
+            ->sort()
+            ->values()
+            ->all();
+
+        foreach ($data as $index => &$entry) {
+            $entry = array_merge([
+                'password' => static::$password ??= 'password',
+            ], $entry);
+
+            $entry['id'] = $uuids[$index];
+            $entry['created_at'] = $currentTime;
+            $entry['updated_at'] = $currentTime;
+        }
+
+        unset($entry);
+
+        return $data;
     }
 }

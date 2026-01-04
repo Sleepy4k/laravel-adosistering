@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} - {{ config('app.name', 'Laravel') }}</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -31,7 +31,7 @@
             }
         }
     </script>
-    
+
     <!-- Custom Form Styles -->
     <style>
         /* Form Input Base Style */
@@ -85,14 +85,14 @@
             margin-top: 4px;
         }
     </style>
-    
+
     <!-- Alpine.js for interactive components -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-no-repeat" style="background-image: url('{{ $backgroundImage }}');">
     <!-- Card Container - Pixel Perfect Figma Specs -->
     <div class="w-[640px] h-auto p-12 flex flex-col gap-6 rounded-3xl border-2 border-white bg-[rgba(255,255,255,0.72)] backdrop-blur-md box-border">
-        
+
         <!-- Title -->
         <h3 class="text-[44px] font-normal text-center text-gray-800 leading-tight w-full">
             {{ $title }}
@@ -110,23 +110,22 @@
         <form method="POST" action="{{ $action }}" class="w-full flex flex-col gap-6">
             @csrf
 
-
-            <!-- Username Field -->
+            <!-- Email Field -->
             <div class="w-full flex flex-col gap-2">
-                <label for="username" class="form-label">
-                    Username
+                <label for="email" class="form-label">
+                    Email
                 </label>
                 <input
                     type="text"
-                    id="username"
-                    name="username"
-                    value="{{ old('username') }}"
+                    id="email"
+                    name="email"
+                    value="{{ old('email') }}"
                     required
                     autofocus
-                    class="form-input {{ $errors->has('username') ? 'error' : '' }}"
-                    placeholder="Masukkan username"
+                    class="form-input {{ $errors->has('email') ? 'error' : '' }}"
+                    placeholder="Masukkan email"
                 />
-                @error('username')
+                @error('email')
                     <span class="form-error">{{ $message }}</span>
                 @enderror
             </div>
@@ -153,7 +152,7 @@
                     >
                         <!-- Eye Icon (Show Password) -->
                         <img x-show="!showPassword" src="{{ asset('assets/icons/eye_on.svg') }}" alt="Show Password" class="w-5 h-5 absolute inset-0">
-                        
+
                         <!-- Eye Slash Icon (Hide Password) -->
                         <img x-show="showPassword" src="{{ asset('assets/icons/eye_off.svg') }}" alt="Hide Password" class="w-5 h-5 absolute inset-0">
                     </button>
@@ -171,15 +170,6 @@
                 Login
             </button>
         </form>
-
-        <!-- Footer Link -->
-        @if($footerLinkRole && $footerLinkUrl !== '#')
-            <div class="w-full text-center">
-                <p class="text-sm text-gray-600">
-                    {{ $footerLinkText }} <a href="{{ $footerLinkUrl }}" class="underline font-medium text-gray-700 hover:text-gray-900 transition">{{ $footerLinkRole }}</a>
-                </p>
-            </div>
-        @endif
     </div>
 </body>
 </html>

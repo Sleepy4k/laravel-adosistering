@@ -10,29 +10,114 @@ return [
         // Highest role in the hierarchy, typically for administrators
         // This should match the highest role in your RBAC configuration
         // It is used to determine the highest level of access in the system
-        'highest' => 'admin',
+        'highest' => 'superadmin',
     ],
 
     /* List of roles and permissions */
     'list' => [
         'roles' => [
+            'superadmin',
             'admin',
             'user',
         ],
         'permissions' => [
+            'dashboard.view',
+
+            'dashboard.view_map',
+            'dashboard.manage_iot',
+
+            'dashboard.filter_iot',
+            'dashboard.create_user',
+            'dashboard.view_user',
+            'dashboard.edit_user',
+            'dashboard.delete_user',
+
+            'history.view',
+            'history.filter',
+
+            'profile.view',
+            'profile.edit',
+            'profile.change_password',
+
+            'user.view',
+            'user.create',
+            'user.edit',
+            'user.delete',
+            'user.filter',
+
+            'statistic.view',
         ],
     ],
 
     /* Roles that can assign other roles */
     'assign' => [
+        'superadmin' => ['superadmin', 'admin', 'user'],
         'admin' => ['admin', 'user'],
         'user' => ['user'],
     ],
 
     /* Permissions for each role */
     'permissions' => [
-        'admin' => 'all',
+        'superadmin' => [
+            'dashboard.view',
+
+            'dashboard.filter_iot',
+            'dashboard.create_user',
+            'dashboard.view_user',
+            'dashboard.edit_user',
+            'dashboard.delete_user',
+
+            'history.view',
+            'history.filter',
+
+            'profile.view',
+            'profile.edit',
+            'profile.change_password',
+
+            'user.view',
+            'user.create',
+            'user.edit',
+            'user.delete',
+            'user.filter',
+
+            'statistic.view',
+        ],
+        'admin' => [
+            'dashboard.view',
+
+            'dashboard.filter_iot',
+            'dashboard.create_user',
+            'dashboard.view_user',
+            'dashboard.edit_user',
+            'dashboard.delete_user',
+
+            'history.view',
+            'history.filter',
+
+            'profile.view',
+            'profile.edit',
+            'profile.change_password',
+
+            'user.view',
+            'user.create',
+            'user.edit',
+            'user.delete',
+            'user.filter',
+
+            'statistic.view',
+        ],
         'user' => [
+            'dashboard.view',
+
+            'dashboard.view_map',
+            'dashboard.manage_iot',
+
+            'history.view',
+            'history.filter',
+
+            'profile.view',
+            'profile.edit',
+            'profile.change_password',
         ],
     ],
 ];

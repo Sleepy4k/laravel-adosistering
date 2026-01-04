@@ -17,11 +17,14 @@ class DatabaseSeeder extends Seeder
     {
         Artisan::call('optimize:clear', [
             '--no-interaction' => true,
-            '--quiet' => true,
+            '--quiet' => app()->isProduction(),
         ]);
 
         $this->call([
-            // TODO: Add other seeders here as needed
+            PermissionSeeder::class,
+            RoleSeeder::class,
+            SidebarMenuSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

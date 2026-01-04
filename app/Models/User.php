@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\HasUuid;
 use App\Concerns\Loggable;
 use App\Concerns\MakeCacheable;
+use App\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +23,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'user_type_id',
         'password',
     ];
 
@@ -43,8 +46,57 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'id' => 'string',
+            'name' => 'string',
+            'email' => 'string',
+            'phone' => 'string',
+            'user_type_id' => 'string',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Send a password reset notification to the user.
+     *
+     * @param  string  $token
+     *
+     * @return void
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = url(route('password.reset', ['token' => $token, 'email' => $this->email], false));
+        $this->notify(new ResetPassword($this->name, $url));
+    }
+
+    /**
+     * Get the blocks for the user.
+     */
+    public function blocks()
+    {
+        return $this->hasMany(Block::class);
+    }
+
+    /**
+     * Get the user API for the user.
+     */
+    public function api()
+    {
+        return $this->hasOne(UserApi::class);
+    }
+
+    /**
+     * Get the user type that owns the user.
+     */
+    public function type()
+    {
+        return $this->belongsTo(UserType::class);
+    }
+
+    /**
+     * Get the details for the user.
+     */
+    public function details()
+    {
+        return $this->hasOne(UserDetail::class);
     }
 }
