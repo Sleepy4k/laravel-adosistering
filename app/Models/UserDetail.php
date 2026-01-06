@@ -48,7 +48,7 @@ class UserDetail extends Model
             'user_id' => 'string',
             'familiar_name' => 'string',
             'gender' => 'string',
-            'date_of_birth' => 'string',
+            'date_of_birth' => 'date',
             'other_phone' => 'string',
             'occupation' => 'string',
             'domicile' => 'string',

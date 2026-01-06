@@ -57,6 +57,7 @@ class UserFactory extends Factory
 
         foreach ($data as $index => &$entry) {
             $entry = array_merge([
+                'is_active' => true,
                 'password' => static::$password ??= 'password123',
             ], $entry);
 

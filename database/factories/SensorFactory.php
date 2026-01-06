@@ -40,6 +40,21 @@ class SensorFactory extends Factory
             [
                 'status' => 'offline',
             ],
+            [
+                'humidity' => 38.7,
+                'flow_rate' => 15.0,
+                'volume' => 200.0,
+                'status' => 'online',
+            ],
+            [
+                'humidity' => 45.0,
+                'flow_rate' => 11.5,
+                'volume' => 130.0,
+                'status' => 'online',
+            ],
+            [
+                'status' => 'error',
+            ]
         ];
 
         $currentTime = now();

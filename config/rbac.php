@@ -36,8 +36,9 @@ return [
             'history.filter',
 
             'profile.view',
-            'profile.edit',
-            'profile.change_password',
+            'profile.edit.basic',
+            'profile.edit.location',
+            'profile.edit.credential',
 
             'user.view',
             'user.create',
@@ -71,8 +72,8 @@ return [
             'history.filter',
 
             'profile.view',
-            'profile.edit',
-            'profile.change_password',
+            'profile.edit.basic',
+            'profile.edit.credential',
 
             'user.view',
             'user.create',
@@ -95,8 +96,9 @@ return [
             'history.filter',
 
             'profile.view',
-            'profile.edit',
-            'profile.change_password',
+            'profile.edit.basic',
+            'profile.edit.location',
+            'profile.edit.credential',
 
             'user.view',
             'user.create',
@@ -116,8 +118,9 @@ return [
             'history.filter',
 
             'profile.view',
-            'profile.edit',
-            'profile.change_password',
+            'profile.edit.basic',
+            'profile.edit.location',
+            'profile.edit.credential',
         ],
     ],
 ];

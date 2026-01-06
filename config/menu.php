@@ -77,14 +77,14 @@ return [
         [
             'label' => 'Beranda',
             'icon' => 'home.svg',
-            'route' => 'superadmin.dashboard',
-            'active' => 'superadmin.dashboard',
+            'route' => 'home',
+            'active' => 'home',
         ],
         [
             'label' => 'Manajemen User',
             'icon' => 'profile.svg',
-            'route' => 'superadmin.users.index',
-            'active' => 'superadmin.users*',
+            'route' => 'users.index',
+            'active' => 'users*',
         ],
         [
             'label' => 'Riwayat Irigasi',

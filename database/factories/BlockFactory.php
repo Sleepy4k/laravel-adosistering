@@ -36,6 +36,18 @@ class BlockFactory extends Factory
                 'name' => 'Block C',
                 'location' => 'Location C',
             ],
+            [
+                'name' => 'Block D',
+                'location' => 'Location D',
+            ],
+            [
+                'name' => 'Block E',
+                'location' => 'Location E',
+            ],
+            [
+                'name' => 'Block F',
+                'location' => 'Location F',
+            ]
         ];
 
         $currentTime = now();

@@ -34,6 +34,15 @@ class SprayerFactory extends Factory
             [
                 'name' => 'Sprayer C',
             ],
+            [
+                'name' => 'Sprayer D',
+            ],
+            [
+                'name' => 'Sprayer E',
+            ],
+            [
+                'name' => 'Sprayer F',
+            ]
         ];
 
         $currentTime = now();

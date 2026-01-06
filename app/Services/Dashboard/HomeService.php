@@ -17,13 +17,14 @@ class HomeService extends Service
 
         return match ($userRole) {
             config('rbac.role.default') => $this->getUserData($user->id),
-            config('rbac.role.highest') => function () {
-                return [];
-            },
-            default => [],
+            config('rbac.role.highest') => $this->getSuperadminData(),
+            default => $this->getAdminData(),
         };
     }
 
+    /**
+     * Get data for regular user.
+     */
     private function getUserData($userId): array
     {
         $coordinates = [];
@@ -35,6 +36,9 @@ class HomeService extends Service
         foreach ($data as $block) {
             if ($block->coordinate) {
                 $coordinates[] = [
+                    'id' => $block->id,
+                    'name' => $block->name,
+                    'opacity' => $block->coordinate->opacity,
                     'marker' => $block->coordinate->marker,
                     'color' => $block->coordinate->color,
                     'points' => $block->coordinate->points,
@@ -76,9 +80,39 @@ class HomeService extends Service
         return compact('blocks', 'coordinates');
     }
 
+    /**
+     * Get data for superadmin.
+     */
     private function getSuperadminData(): array
     {
-        // Implement data retrieval logic for highest role users here
-        return [];
+        $firebaseConfig = config('firebase');
+
+        return [
+            'appId' => $firebaseConfig['app_id'],
+            'apiKey' => $firebaseConfig['api_key'],
+            'projectId' => $firebaseConfig['project_id'],
+            'authDomain' => $firebaseConfig['auth_domain'],
+            'databaseURL' => $firebaseConfig['database_url'],
+            'storageBucket' => $firebaseConfig['storage_bucket'],
+            'messagingSenderId' => $firebaseConfig['messaging_sender_id'],
+        ];
+    }
+
+    /**
+     * Get data for admin.
+     */
+    private function getAdminData(): array
+    {
+        $firebaseConfig = config('firebase');
+
+        return [
+            'appId' => $firebaseConfig['app_id'],
+            'apiKey' => $firebaseConfig['api_key'],
+            'projectId' => $firebaseConfig['project_id'],
+            'authDomain' => $firebaseConfig['auth_domain'],
+            'databaseURL' => $firebaseConfig['database_url'],
+            'storageBucket' => $firebaseConfig['storage_bucket'],
+            'messagingSenderId' => $firebaseConfig['messaging_sender_id'],
+        ];
     }
 }

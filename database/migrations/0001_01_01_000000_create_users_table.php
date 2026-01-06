@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->unique();
+            $table->boolean('is_active')->default(true);
             $table->foreignIdFor(UserType::class)->constrained()->cascadeOnDelete();
             $table->string('password');
             $table->rememberToken();

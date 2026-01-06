@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/logout', Auth\LogoutController::class)->name('logout');
 
     Route::get('/', Dashboard\HomeController::class)->name('home');
+
+    Route::resource('users', Dashboard\UserController::class)->except('show');
+    Route::post('/users/{user}/status', [Dashboard\UserController::class, 'setActiveStatus'])->name('users.status');
 });
 
 // Default route - redirect to user login

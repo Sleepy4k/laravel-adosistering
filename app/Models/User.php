@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'is_active',
         'user_type_id',
         'password',
     ];
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'name' => 'string',
             'email' => 'string',
             'phone' => 'string',
+            'is_active' => 'boolean',
             'user_type_id' => 'string',
             'password' => 'hashed',
         ];
