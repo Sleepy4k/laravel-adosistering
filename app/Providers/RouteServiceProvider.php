@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
@@ -25,6 +26,8 @@ class RouteServiceProvider extends ServiceProvider
         if (app()->runningInConsole()) {
             return;
         }
+
+        Route::pattern('profileType', 'basic|other|credential');
 
         RateLimiter::for('web', function ($request) {
             return Limit::perMinute(60)

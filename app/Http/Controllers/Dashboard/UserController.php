@@ -52,7 +52,14 @@ class UserController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->service->store($request->validated());
+        $result = $this->service->store($request->validated());
+
+        if (!$result) {
+            session()->flash('error', 'Failed to create new user.');
+            return back()->withInput();
+        }
+
+        session()->flash('success', 'New user created successfully.');
 
         return to_route('users.index');
     }
@@ -70,7 +77,14 @@ class UserController extends Controller
      */
     public function update(UpdateRequest $request, User $user)
     {
-        $this->service->update($request->validated(), $user);
+        $result = $this->service->update($request->validated(), $user);
+
+        if (!$result) {
+            session()->flash('error', 'Failed to update user.');
+            return back()->withInput();
+        }
+
+        session()->flash('success', 'User updated successfully.');
 
         return to_route('users.index');
     }
@@ -80,7 +94,14 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->service->destroy($user);
+        $result = $this->service->destroy($user);
+
+        if (!$result) {
+            session()->flash('error', 'Failed to delete user.');
+            return back();
+        }
+
+        session()->flash('success', 'User deleted successfully.');
 
         return to_route('users.index');
     }

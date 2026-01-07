@@ -11,54 +11,57 @@ class ProfileService extends Service
      */
     public function index(): array
     {
-        return [];
-    }
+        $genders = ['male', 'female'];
+        $user = auth('web')->user()->load('details');
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): array
-    {
-        return [];
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(array $request): bool
-    {
-        return false;
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(int $id): array
-    {
-        return [];
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(int $id): array
-    {
-        return [];
+        return compact('user', 'genders');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(array $request, int $id): bool
+    public function update(array $request, string $type): bool
     {
-        return false;
+        $user = auth('web')->user();
+
+        return match ($type) {
+            'basic' => $this->updateBasicInfo($user, $request),
+            'other' => $this->updateOtherInfo($user, $request),
+            'credential' => $user->update(['password' => $request['password']]),
+            default => false,
+        };
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Update basic profile information.
      */
-    public function destroy(int $id): bool
+    private function updateBasicInfo($user, array $request): bool
     {
-        return false;
+        $user->details()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['address' => $request['address']]
+        );
+
+        return $user->update([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'phone' => $request['phone'],
+        ]);
+    }
+
+    /**
+     * Update other profile information.
+     */
+    private function updateOtherInfo($user, array $request): bool
+    {
+        return (bool) $user->details()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'gender' => $request['gender'] ?? null,
+                'date_of_birth' => $request['date_of_birth'] ?? null,
+                'occupation' => $request['occupation'] ?? null,
+                'domicile' => $request['domicile'] ?? null,
+            ]
+        );
     }
 }

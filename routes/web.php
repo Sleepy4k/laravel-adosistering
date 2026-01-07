@@ -43,6 +43,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', Dashboard\HomeController::class)->name('home');
 
+    Route::resource('profile', Dashboard\ProfileController::class)
+        ->only(['index', 'update'])
+        ->parameters(['profile' => 'profileType']);
+
     Route::resource('users', Dashboard\UserController::class)->except('show');
     Route::post('/users/{user}/status', [Dashboard\UserController::class, 'setActiveStatus'])->name('users.status');
 });

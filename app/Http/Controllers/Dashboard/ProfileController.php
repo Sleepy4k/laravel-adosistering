@@ -3,63 +3,54 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Foundations\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Dashboard\Profile\UpdateRequest;
+use App\Policies\Dashboard\ProfilePolicy;
+use App\Services\Dashboard\ProfileService;
+use App\Traits\Authorizable;
 
 class ProfileController extends Controller
 {
+    use Authorizable;
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(
+        private ProfileService $service,
+        private $policy = ProfilePolicy::class,
+        private $abilities = [
+            'index' => 'viewAny',
+            'update' => 'update',
+        ]
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return view('dashboard.profile.index', $this->service->index());
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request, string $profileType)
     {
-        //
-    }
+        if (!in_array($profileType, ['basic', 'other', 'credential'])) {
+            session()->flash('error', 'Invalid profile type.');
+            return back()->withInput();
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $result = $this->service->update($request->validated(), $profileType);
+
+        if (!$result) {
+            session()->flash('error', 'Failed to update profile.');
+            return back()->withInput();
+        }
+
+        session()->flash('success', 'Profile updated successfully.');
+
+        return to_route('users.index');
     }
 }

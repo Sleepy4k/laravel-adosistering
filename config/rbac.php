@@ -37,7 +37,7 @@ return [
 
             'profile.view',
             'profile.edit.basic',
-            'profile.edit.location',
+            'profile.edit.other',
             'profile.edit.credential',
 
             'user.view',
@@ -97,7 +97,7 @@ return [
 
             'profile.view',
             'profile.edit.basic',
-            'profile.edit.location',
+            'profile.edit.other',
             'profile.edit.credential',
 
             'user.view',
@@ -119,7 +119,7 @@ return [
 
             'profile.view',
             'profile.edit.basic',
-            'profile.edit.location',
+            'profile.edit.other',
             'profile.edit.credential',
         ],
     ],
