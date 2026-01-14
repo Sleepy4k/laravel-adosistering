@@ -77,7 +77,9 @@ class HomeService extends Service
             ];
         })->toArray();
 
-        return compact('blocks', 'coordinates');
+        $firebase = $this->getFirebaseConfig();
+
+        return compact('blocks', 'coordinates', 'firebase');
     }
 
     /**
@@ -85,23 +87,21 @@ class HomeService extends Service
      */
     private function getSuperadminData(): array
     {
-        $firebaseConfig = config('firebase');
-
-        return [
-            'appId' => $firebaseConfig['app_id'],
-            'apiKey' => $firebaseConfig['api_key'],
-            'projectId' => $firebaseConfig['project_id'],
-            'authDomain' => $firebaseConfig['auth_domain'],
-            'databaseURL' => $firebaseConfig['database_url'],
-            'storageBucket' => $firebaseConfig['storage_bucket'],
-            'messagingSenderId' => $firebaseConfig['messaging_sender_id'],
-        ];
+        return $this->getFirebaseConfig();
     }
 
     /**
      * Get data for admin.
      */
     private function getAdminData(): array
+    {
+        return $this->getFirebaseConfig();
+    }
+
+    /**
+     * Get Firebase configuration.
+     */
+    private function getFirebaseConfig(): array
     {
         $firebaseConfig = config('firebase');
 
