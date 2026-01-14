@@ -87,6 +87,7 @@
                 <x-user.sprayer-card 
                     :sprayerId="$sprayer['id']"
                     :blockId="$blockId"
+                    :blockName="$blockName"
                     :name="$sprayer['name']"
                     :location="$sprayer['location']"
                     :sensorStatus="$sprayer['sensorStatus']"

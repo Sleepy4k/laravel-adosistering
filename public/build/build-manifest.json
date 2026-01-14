@@ -1,0 +1,86 @@
+{
+  "_axios-B9ygI19o.js": {
+    "file": "bundle/axios-B9ygI19o.js",
+    "name": "axios"
+  },
+  "resources/css/app.css": {
+    "file": "bundle/app-DmY2mrPg.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/css/components/buttons.css": {
+    "file": "bundle/buttons-iqem-goR.css",
+    "src": "resources/css/components/buttons.css",
+    "isEntry": true,
+    "name": "buttons",
+    "names": [
+      "buttons.css"
+    ]
+  },
+  "resources/css/components/checkbox.css": {
+    "file": "bundle/checkbox-CpnLUW3X.css",
+    "src": "resources/css/components/checkbox.css",
+    "isEntry": true,
+    "name": "checkbox",
+    "names": [
+      "checkbox.css"
+    ]
+  },
+  "resources/css/components/forms.css": {
+    "file": "bundle/forms-BANfw4Y1.css",
+    "src": "resources/css/components/forms.css",
+    "isEntry": true,
+    "name": "forms",
+    "names": [
+      "forms.css"
+    ]
+  },
+  "resources/css/components/utilities.css": {
+    "file": "bundle/utilities-BrK01kev.css",
+    "src": "resources/css/components/utilities.css",
+    "isEntry": true,
+    "name": "utilities",
+    "names": [
+      "utilities.css"
+    ]
+  },
+  "resources/css/components/variables.css": {
+    "file": "bundle/variables-DAiLhUKH.css",
+    "src": "resources/css/components/variables.css",
+    "isEntry": true,
+    "name": "variables",
+    "names": [
+      "variables.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "bundle/app-5Zpp1tTX.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "resources/js/bootstrap.js",
+      "resources/js/firebase.js",
+      "_axios-B9ygI19o.js"
+    ]
+  },
+  "resources/js/bootstrap.js": {
+    "file": "bundle/bootstrap-0LOOIUZW.js",
+    "name": "bootstrap",
+    "src": "resources/js/bootstrap.js",
+    "isEntry": true,
+    "imports": [
+      "_axios-B9ygI19o.js"
+    ]
+  },
+  "resources/js/firebase.js": {
+    "file": "bundle/firebase-D_lvcoqF.js",
+    "name": "firebase",
+    "src": "resources/js/firebase.js",
+    "isEntry": true
+  }
+}

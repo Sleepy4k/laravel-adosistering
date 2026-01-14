@@ -107,21 +107,45 @@
                         $isActive = request()->routeIs($item['active']);
                     }
                 }
+                
+                // Check if this is logout item
+                $isLogout = $item['route'] === 'logout';
             @endphp
-            <a 
-                href="{{ is_string($item['route']) && str_starts_with($item['route'], '#') ? $item['route'] : route($item['route']) }}" 
-                class="flex items-center gap-4 px-4 py-3 rounded-xl transition-colors
-                    {{ isset($item['danger']) && $item['danger'] ? 'text-[#4F4F4F] hover:bg-red-50 hover:text-red-600' : 'text-[#4F4F4F] hover:bg-gray-50' }}
-                    {{ $isActive && !isset($item['danger']) ? 'bg-[#6BC145] text-white' : '' }}"
-            >
-                <img 
-                    src="{{ asset('assets/icons/' . $item['icon']) }}" 
-                    alt="{{ $item['label'] }}" 
-                    class="w-5 h-5 shrink-0 {{ $isActive && !isset($item['danger']) ? 'brightness-0 invert' : '' }}"
+            
+            @if($isLogout)
+                {{-- Logout form with DELETE method --}}
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    @method('DELETE')
+                    <button 
+                        type="submit"
+                        class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-colors text-left
+                            {{ isset($item['danger']) && $item['danger'] ? 'text-[#4F4F4F] hover:bg-red-50 hover:text-red-600' : 'text-[#4F4F4F] hover:bg-gray-50' }}"
+                    >
+                        <img 
+                            src="{{ asset('assets/icons/' . $item['icon']) }}" 
+                            alt="{{ $item['label'] }}" 
+                            class="w-5 h-5 shrink-0"
+                        >
+                        <span x-show="open" x-transition class="whitespace-nowrap text-[15px] font-normal">{{ $item['label'] }}</span>
+                    </button>
+                </form>
+            @else
+                <a 
+                    href="{{ is_string($item['route']) && str_starts_with($item['route'], '#') ? $item['route'] : route($item['route']) }}" 
+                    class="flex items-center gap-4 px-4 py-3 rounded-xl transition-colors
+                        {{ isset($item['danger']) && $item['danger'] ? 'text-[#4F4F4F] hover:bg-red-50 hover:text-red-600' : 'text-[#4F4F4F] hover:bg-gray-50' }}
+                        {{ $isActive && !isset($item['danger']) ? 'bg-[#6BC145] text-white' : '' }}"
                 >
-                <span x-show="open" x-transition class="whitespace-nowrap text-[15px] font-normal">{{ $item['label'] }}</span>
-            </a>
+                    <img 
+                        src="{{ asset('assets/icons/' . $item['icon']) }}" 
+                        alt="{{ $item['label'] }}" 
+                        class="w-5 h-5 shrink-0 {{ $isActive && !isset($item['danger']) ? 'brightness-0 invert' : '' }}"
+                    >
+                    <span x-show="open" x-transition class="whitespace-nowrap text-[15px] font-normal">{{ $item['label'] }}</span>
+                </a>
+            @endif
         @endforeach
-    </nav>
+    </div>
 
 </aside>

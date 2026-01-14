@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 @layer components {
   .btn-3d-green {
     background-color: var(--color-primary);

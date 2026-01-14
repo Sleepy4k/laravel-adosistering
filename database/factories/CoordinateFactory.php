@@ -28,7 +28,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'A',
                 'color' => '#55ff00',
-                'opacity' => 0.5,
                 'points' => [
                     ['lat' => -7.611662588770801, 'lng' => 109.1770180391451],
                     ['lat' => -7.611729371676888, 'lng' => 109.1772718588196],
@@ -41,7 +40,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'B',
                 'color' => '#ffff00',
-                'opacity' => 0.6,
                 'points' => [
                     ['lat' => -7.611529918847196, 'lng' => 109.1773382311982],
                     ['lat' => -7.61170700918951,  'lng' => 109.1773100379775],
@@ -64,7 +62,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'C',
                 'color' => '#767676',
-                'opacity' => 0.5,
                 'points' => [
                     ['lat' => -7.611234549431889, 'lng' => 109.1774533818596],
                     ['lat' => -7.611224757792614, 'lng' => 109.1774755766219],
@@ -86,7 +83,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'D',
                 'color' => '#00bfff',
-                'opacity' => 0.5,
                 'points' => [
                     ['lat' => -7.611411128434352, 'lng' => 109.177253593713],
                     ['lat' => -7.611368607887754, 'lng' => 109.1772299182996],
@@ -112,7 +108,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'E',
                 'color' => '#0066ff',
-                'opacity' => 0.5,
                 'points' => [
                     ['lat' => -7.611487389962345, 'lng' => 109.1773236475781],
                     ['lat' => -7.611414704625105, 'lng' => 109.1773353802701],
@@ -129,7 +124,6 @@ class CoordinateFactory extends Factory
             [
                 'marker' => 'F',
                 'color' => '#9933ff',
-                'opacity' => 0.5,
                 'points' => [
                     ['lat' => -7.611342881224713, 'lng' => 109.1773592121075],
                     ['lat' => -7.611359429101592, 'lng' => 109.1773737758401],
@@ -161,7 +155,6 @@ class CoordinateFactory extends Factory
         foreach ($data as $index => &$entry) {
             $entry = array_merge([
                 'block_id' => $blocks[$index],
-                'opacity' => 1.0,
             ], $entry);
 
             $entry['id'] = $uuids[$index];

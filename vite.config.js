@@ -25,7 +25,7 @@ export default defineConfig({
     },
     build: {
         manifest: 'build-manifest.json',
-        outDir: 'public/assets',
+        outDir: 'public/build',
         assetsDir: 'bundle',
         chunkSizeWarningLimit: 500,
         rollupOptions: {
