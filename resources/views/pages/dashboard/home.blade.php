@@ -126,43 +126,60 @@
                     return new Date(timestamp * 1000).toLocaleString('id-ID');
                 },
 
-                formatRelativeTime(minutesAgo) {
-                    // Firebase timestamp sudah dalam format "berapa menit yang lalu"
-                    // Contoh: 5 = 5 menit yang lalu, 120 = 120 menit yang lalu
+                formatRelativeTime(epochTimestamp) {
+                    // Convert Unix Epoch timestamp to relative time
+                    // epochTimestamp is in seconds (Unix timestamp)
                     
-                    if (!minutesAgo || minutesAgo === 0) {
+                    if (!epochTimestamp || epochTimestamp === 0) {
+                        return 'Belum ada data';
+                    }
+                    
+                    // Convert to number if string
+                    const timestamp = Number(epochTimestamp);
+                    
+                    // Get current time in seconds
+                    const nowInSeconds = Math.floor(Date.now() / 1000);
+                    
+                    // Calculate difference in seconds
+                    const diffInSeconds = nowInSeconds - timestamp;
+                    
+                    // If timestamp is in the future or invalid
+                    if (diffInSeconds < 0) {
                         return 'Baru saja';
                     }
                     
-                    // Konversi ke number jika string
-                    const minutes = Number(minutesAgo);
+                    // Convert to minutes
+                    const minutes = Math.floor(diffInSeconds / 60);
                     
-                    // Kurang dari 1 menit
+                    // Less than 1 minute (0-59 seconds)
                     if (minutes < 1) {
                         return 'Baru saja';
                     }
-                    // 1-59 menit
-                    else if (minutes < 60) {
+                    
+                    // 1-59 minutes
+                    if (minutes < 60) {
                         return `${minutes} menit yang lalu`;
                     }
-                    // 1-23 jam (60-1439 menit)
-                    else if (minutes < 1440) {
-                        const hours = Math.floor(minutes / 60);
+                    
+                    // 1-23 hours (60-1439 minutes)
+                    const hours = Math.floor(minutes / 60);
+                    if (hours < 24) {
                         return `${hours} jam yang lalu`;
                     }
-                    // 1-29 hari (1440-43199 menit)
-                    else if (minutes < 43200) {
-                        const days = Math.floor(minutes / 1440);
+                    
+                    // 1-29 days (24-719 hours)
+                    const days = Math.floor(hours / 24);
+                    if (days < 30) {
                         return `${days} hari yang lalu`;
                     }
-                    // 30 hari ke atas
-                    else {
-                        const months = Math.floor(minutes / 43200);
-                        if (months === 1) {
-                            return '1 bulan yang lalu';
-                        }
-                        return `${months} bulan yang lalu`;
+                    
+                    // 30+ days
+                    const months = Math.floor(days / 30);
+                    if (months === 1) {
+                        return '1 bulan yang lalu';
                     }
+                    
+                    return `${months} bulan yang lalu`;
                 }
             }
         }

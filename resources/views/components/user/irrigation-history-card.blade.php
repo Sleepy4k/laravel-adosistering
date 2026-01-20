@@ -24,29 +24,33 @@
             {{ ucfirst($jenis) }}
         </span>
     </div>
-    <div class="flex flex-row flex-wrap gap-6 items-center text-base text-title-card">
+    <div class="flex flex-row flex-wrap gap-6 items-center text-base text-[#4F4F4F]">
         <div class="flex items-center gap-1.5">
             <img src="/assets/icons/soil-temperature.svg" class="w-5 h-5" alt="Soil">
-            <span>Kelembaban Tanah: <span class="font-bold text-text-green">{{ $kelembaban }}</span></span>
+            <span class="text-sm">Kelembaban Tanah: <span class="font-bold text-[#16A34A]">{{ $kelembaban }}</span></span>
         </div>
         @if($persentase)
         <div class="flex items-center gap-1.5">
             <img src="/assets/icons/chart-line.svg" class="w-5 h-5" alt="Stat">
-            <span>Persentase: <span class="font-bold text-text-green">{{ $persentase }}</span></span>
+            <span class="text-sm">Persentase: <span class="font-bold text-[#16A34A]">{{ $persentase }}</span></span>
         </div>
         @endif
         @if($total_air)
         <div class="flex items-center gap-1.5">
             <img src="/assets/icons/water.svg" class="w-5 h-5" alt="Water">
-            <span>Total Air: <span class="font-bold text-text-green">{{ $total_air }}</span></span>
+            <span class="text-sm">Total Air: <span class="font-bold text-[#16A34A]">{{ $total_air }}</span></span>
         </div>
+        @endif
+        @if($debit_air)
         <div class="flex items-center gap-1.5">
             <img src="/assets/icons/wind-flow.svg" class="w-5 h-5" alt="Debit">
-            <span>Debit Air: <span class="font-bold text-text-green">{{ $debit_air }}</span></span>
+            <span class="text-sm">Debit Air: <span class="font-bold text-[#16A34A]">{{ $debit_air }}</span></span>
         </div>
+        @endif
+        @if($durasi)
         <div class="flex items-center gap-1.5">
             <img src="/assets/icons/timer-sand.svg" class="w-5 h-5" alt="Timer">
-            <span>Durasi: <span class="font-bold text-text-green">{{ $durasi }}</span></span>
+            <span class="text-sm">Durasi: <span class="font-bold text-[#16A34A]">{{ $durasi }}</span></span>
         </div>
         @endif
     </div>

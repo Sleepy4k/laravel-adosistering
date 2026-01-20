@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'update'])
         ->parameters(['profile' => 'profileType']);
 
+    Route::get('/irrigation-history', Dashboard\IrrigationHistoryController::class)->name('irrigation-history');
+
     Route::resource('users', Dashboard\UserController::class)->except('show');
     Route::post('/users/{user}/status', [Dashboard\UserController::class, 'setActiveStatus'])->name('users.status');
 });

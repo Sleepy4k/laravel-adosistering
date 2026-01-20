@@ -19,24 +19,24 @@ class SidebarMenuFactory extends Factory
     {
         $data = [
             [
-                'label' => 'Dashboard',
-                'icon' => 'dashboard.svg',
-                'route' => 'dashboard.index',
-                'active' => 'dashboard',
+                'label' => 'Beranda',
+                'icon' => 'home.svg',
+                'route' => 'home',
+                'active' => 'home',
                 'permissions' => ['dashboard.view'],
             ],
             [
                 'label' => 'Manajemen User',
                 'icon' => 'profile.svg',
-                'route' => '#',
-                'active' => 'admin.users*',
+                'route' => 'users.index',
+                'active' => 'users*',
                 'permissions' => ['user.view'],
             ],
             [
                 'label' => 'Riwayat Irigasi',
                 'icon' => 'history.svg',
-                'route' => '#',
-                'active' => 'irrigation.history*',
+                'route' => 'irrigation-history',
+                'active' => 'irrigation-history*',
                 'permissions' => ['history.view'],
             ],
             [
@@ -44,25 +44,28 @@ class SidebarMenuFactory extends Factory
                 'icon' => 'statistic.svg',
                 'route' => '#',
                 'active' => 'statistics*',
-                'permissions' => ['statistics.view'],
+                'permissions' => ['statistic.view'],
             ],
             [
                 'label' => 'Profil',
                 'icon' => 'profile.svg',
-                'route' => '#',
+                'route' => 'profile.index',
                 'active' => 'profile*',
+                'permissions' => ['profile.view'],
             ],
             [
                 'label' => 'Notifikasi',
                 'icon' => 'notification.svg',
                 'route' => '#',
                 'active' => 'notifications*',
+                'permissions' => [],
             ],
             [
                 'label' => 'Pengaturan',
                 'icon' => 'settings.svg',
                 'route' => '#',
                 'active' => 'settings*',
+                'permissions' => [],
             ],
             [
                 'label' => 'Pusat Bantuan',
@@ -70,14 +73,16 @@ class SidebarMenuFactory extends Factory
                 'route' => '#',
                 'active' => 'help*',
                 'is_bottom' => true,
+                'permissions' => [],
             ],
             [
                 'label' => 'Log Out',
                 'icon' => 'logout.svg',
-                'route' => '#',
+                'route' => 'logout',
                 'active' => 'logout',
                 'is_bottom' => true,
                 'danger' => true,
+                'permissions' => [],
             ]
         ];
 

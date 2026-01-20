@@ -11,14 +11,14 @@ return [
         [
             'label' => 'Riwayat Irigasi',
             'icon' => 'history.svg',
-            'route' =>'#',
-            'active' => 'user.history*',
+            'route' => 'irrigation-history',
+            'active' => 'irrigation-history*',
         ],
         [
             'label' => 'Profil',
             'icon' => 'profile.svg',
-            'route' => '#',
-            'active' => 'user.profile*',
+            'route' => 'profile.index',
+            'active' => 'profile*',
         ],
         [
             'label' => 'Notifikasi',
@@ -38,20 +38,20 @@ return [
         [
             'label' => 'Beranda',
             'icon' => 'home.svg',
-            'route' => 'admin.dashboard',
-            'active' => 'admin.dashboard',
+            'route' => 'home',
+            'active' => 'home',
         ],
         [
             'label' => 'Manajemen User',
             'icon' => 'profile.svg',
-            'route' => 'admin.users.index',
-            'active' => 'admin.users*',
+            'route' => 'users.index',
+            'active' => 'users*',
         ],
         [
             'label' => 'Riwayat Irigasi',
             'icon' => 'history.svg',
-            'route' => '#',
-            'active' => 'admin.history*',
+            'route' => 'irrigation-history',
+            'active' => 'irrigation-history*',
         ],
         [
             'label' => 'Statistik',
@@ -89,8 +89,8 @@ return [
         [
             'label' => 'Riwayat Irigasi',
             'icon' => 'history.svg',
-            'route' => '#',
-            'active' => 'superadmin.history*',
+            'route' => 'irrigation-history',
+            'active' => 'irrigation-history*',
         ],
         [
             'label' => 'Statistik',
