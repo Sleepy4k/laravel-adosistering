@@ -4,7 +4,7 @@
     "name": "axios"
   },
   "resources/css/app.css": {
-    "file": "bundle/app-DmY2mrPg.css",
+    "file": "bundle/app-CVn80K-c.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -58,13 +58,12 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "bundle/app-5Zpp1tTX.js",
+    "file": "bundle/app-8vPi_unz.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "resources/js/bootstrap.js",
-      "resources/js/firebase.js",
       "_axios-B9ygI19o.js"
     ]
   },
@@ -77,8 +76,14 @@
       "_axios-B9ygI19o.js"
     ]
   },
+  "resources/js/chart-loader.js": {
+    "file": "bundle/chart-loader-_6MD-MUE.js",
+    "name": "chart-loader",
+    "src": "resources/js/chart-loader.js",
+    "isEntry": true
+  },
   "resources/js/firebase.js": {
-    "file": "bundle/firebase-D_lvcoqF.js",
+    "file": "bundle/firebase-SRXG0tnG.js",
     "name": "firebase",
     "src": "resources/js/firebase.js",
     "isEntry": true

@@ -263,24 +263,8 @@ export function listenToMAOS(callback) {
     });
 }
 
-// Export for global access
-window.FirebaseIoT = {
-    initialize: initializeFirebase,
-    listenToData,
-    getData,
-    setData,
-    updateData,
-    listenToSensor,
-    listenToSprayer,
-    controlPump,
-    controlRelay,
-    getRelayStatus,
-    listenToRelay,
-    setAutoIrrigation,
-    listenToMAOS,
-};
-
-export default {
+// Export all functions for modular usage
+const FirebaseModule = {
     initializeFirebase,
     getRef,
     listenToData,
@@ -296,3 +280,10 @@ export default {
     setAutoIrrigation,
     listenToMAOS,
 };
+
+// Expose to window for browser usage (important for dynamic import)
+if (typeof window !== 'undefined') {
+    window.FirebaseModule = FirebaseModule;
+}
+
+export default FirebaseModule;

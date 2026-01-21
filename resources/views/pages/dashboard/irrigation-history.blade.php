@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+﻿@extends('layouts.dashboard')
 
 @section('title', 'Riwayat Irigasi')
 
@@ -10,7 +10,7 @@
                 <h1 class="text-2xl font-bold text-[#4F4F4F]">Riwayat Irigasi</h1>
                 <div class="flex items-center gap-3">
                     <p class="text-sm text-gray-500" x-text="currentDate"></p>
-                    <img src="/assets/images/default-avatar.jpg" alt="Profile" class="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm" />
+                    <img src="/assets/images/default-avatar.jpg" alt="Profile" loading="lazy" class="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm" />
                 </div>
             </div>
         </div>

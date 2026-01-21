@@ -1,4 +1,4 @@
-@extends('layouts.superadmin')
+@extends('layouts.dashboard')
 
 @section('title', 'Tambah Pengguna')
 
@@ -451,7 +451,7 @@
                                 <div class="flex items-center gap-3">
                                     <!-- Avatar -->
                                     <img :src="user.profileImage || '{{ asset('assets/images/default-avatar.jpg') }}'"
-                                        :alt="user.nama" class="w-10 h-10 rounded-full object-cover">
+                                        :alt="user.nama" loading="lazy" class="w-10 h-10 rounded-full object-cover">
 
                                     <!-- User Info -->
                                     <div class="flex-1 min-w-0">

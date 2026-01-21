@@ -1,4 +1,4 @@
-@extends('layouts.user')
+@extends('layouts.dashboard')
 
 @section('title', 'Profil')
 
@@ -68,7 +68,7 @@
         <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-6 mb-6">
             <h2 class="text-lg font-semibold text-[#4F4F4F] mb-4">Profil Saya</h2>
             <div class="flex items-center gap-4">
-                <img src="{{ asset('assets/images/default-avatar.jpg') }}" alt="Profile" class="w-16 h-16 rounded-full object-cover border border-gray-200 shadow-sm" />
+                <img src="{{ asset('assets/images/default-avatar.jpg') }}" alt="Profile" loading="lazy" class="w-16 h-16 rounded-full object-cover border border-gray-200 shadow-sm" />
                 <div class="flex flex-col">
                     <span class="text-lg font-semibold text-[#4F8936]" x-text="profile.nama_lengkap"></span>
                     <span class="text-sm text-gray-500" x-text="profile.bio"></span>

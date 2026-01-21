@@ -1,191 +1,203 @@
-@extends('layouts.user')
+@extends('layouts.dashboard')
 
-@section('title', 'Dashboard User')
+@section('title', 'Dashboard')
 
 @section('content')
+    @role(config('rbac.role.default'))
+        {{-- Store Firebase module path from Vite --}}
+        <script>
+            window.__FIREBASE_MODULE_PATH__ = "{{ Vite::asset('resources/js/firebase.js') }}";
+        </script>
+        
+        {{-- Define iotDashboard function BEFORE Alpine.js initializes --}}
+        <script>
+            // Define function IMMEDIATELY in window scope (synchronous, before Alpine)
+            window.iotDashboard = function(firebaseConfig) {
+                return {
+                    isConnected: false,
+                    isLoading: true,
+                    firebaseBlocks: [],
+                    loadingStates: {},
+                    _firebaseModule: null,
+                    
+                    init() {
+                        this.loadFirebaseModule(firebaseConfig);
+                    },
 
-    <script>
-        window.iotDashboard = function(firebaseConfig) {
-            return {
-                isConnected: false,
-                isLoading: true,
-                firebaseBlocks: [],
-                loadingStates: {},
-                retryCount: 0,
-                maxRetries: 10,
-                
-                init() {
-                    // Initialize IoT Dashboard
-                    this.waitForFirebase(firebaseConfig);
-                },
-
-                waitForFirebase(config) {
-                    if (!window.FirebaseIoT) {
-                        if (this.retryCount < this.maxRetries) {
-                            this.retryCount++;
-                            setTimeout(() => this.waitForFirebase(config), 300);
-                        } else {
-                            console.error('❌ FirebaseIoT library tidak tersedia');
-                            this.isLoading = false;
-                        }
-                        return;
-                    }
-
-                    if (config && config.apiKey) {
-                        const db = window.FirebaseIoT.initialize(config);
-                        if (db) {
-                            this.isConnected = true;
-                            this.listenToBlocks();
-                        } else {
-                            console.error('❌ Firebase gagal diinisialisasi');
-                            this.isLoading = false;
-                        }
-                    } else {
-                        console.error('❌ Firebase config tidak ditemukan');
-                        this.isLoading = false;
-                    }
-                },
-
-                getLoadingKey(blockName, sprayerName) {
-                    return blockName + '/' + sprayerName;
-                },
-
-                isSprayerLoading(blockName, sprayerName) {
-                    return this.loadingStates[this.getLoadingKey(blockName, sprayerName)] || false;
-                },
-
-                setSprayerLoading(blockName, sprayerName, loading) {
-                    const key = this.getLoadingKey(blockName, sprayerName);
-                    this.loadingStates[key] = loading;
-                    // Force Alpine reactivity
-                    this.loadingStates = { ...this.loadingStates };
-                },
-
-                listenToBlocks() {
-                    window.FirebaseIoT.listenToMAOS((result) => {
-                        this.isLoading = false;
-                        
-                        if (result.blocks && result.blocks.length > 0) {
-                            result.blocks.forEach(block => {
-                                const existing = this.firebaseBlocks.find(b => b.name === block.name);
-                                block.isOpen = existing ? existing.isOpen : true;
-                            });
+                    async loadFirebaseModule(config) {
+                        try {
+                            // Dynamic import using path from Vite
+                            const modulePath = window.__FIREBASE_MODULE_PATH__;
                             
-                            this.firebaseBlocks = result.blocks;
-                            // Data updated silently, no console log
+                            // Import the module - this executes the module code
+                            // which registers FirebaseModule on window
+                            await import(modulePath);
+                            
+                            // After import, module should be available on window
+                            // because firebase.js sets window.FirebaseModule
+                            const firebaseModule = window.FirebaseModule;
+                            
+                            
+                            if (!firebaseModule || typeof firebaseModule.initializeFirebase !== 'function') {
+                                console.error('❌ Firebase module not found on window.FirebaseModule');
+                                console.error('Check that firebase.js sets window.FirebaseModule');
+                                this.isLoading = false;
+                                return;
+                            }
+                            
+                            // Store module reference
+                            this._firebaseModule = firebaseModule;
+                            
+                            // Initialize Firebase after module is loaded
+                            this.initializeFirebaseWithModule(config, firebaseModule);
+                        } catch (error) {
+                            console.error('❌ Failed to load Firebase module:', error);
+                            this.isLoading = false;
                         }
-                    });
-                },
+                    },
 
-                async toggleRelay(blockName, sprayerName, turnOn) {
-                    // Check if already loading
-                    if (this.isSprayerLoading(blockName, sprayerName)) {
-                        return;
-                    }
-
-                    this.setSprayerLoading(blockName, sprayerName, true);
-
-                    try {
-                        const success = await window.FirebaseIoT.controlRelay(blockName, sprayerName, turnOn);
-                        if (!success) {
-                            alert('Gagal mengubah status pompa');
+                    initializeFirebaseWithModule(config, firebaseModule) {
+                        if (!firebaseModule) {
+                            console.error('❌ Firebase module not provided');
+                            this.isLoading = false;
+                            return;
                         }
-                    } catch (error) {
-                        console.error('Error toggle relay:', error);
-                        alert('Error: ' + error.message);
-                    } finally {
-                        // Small delay to let Firebase update first
-                        setTimeout(() => {
-                            this.setSprayerLoading(blockName, sprayerName, false);
-                        }, 500);
-                    }
-                },
 
-                async turnOnAllSprayers(blockName) {
-                    const block = this.firebaseBlocks.find(b => b.name === blockName);
-                    if (!block) return;
-                    
-                    for (const sprayer of block.sprayers) {
-                        await this.toggleRelay(blockName, sprayer.name, true);
-                    }
-                },
+                        if (config && config.apiKey) {
+                            try {
+                                // Initialize Firebase
+                                const db = firebaseModule.initializeFirebase(config);
+                                if (db) {
+                                    // Make all Firebase functions available globally
+                                    window.FirebaseIoT = firebaseModule;
+                                    this._firebaseModule = firebaseModule;
+                                    
+                                    this.isConnected = true;
+                                    this.listenToBlocks();
+                                } else {
+                                    console.error('❌ Firebase gagal diinisialisasi');
+                                    this.isLoading = false;
+                                }
+                            } catch (error) {
+                                console.error('❌ Firebase initialization error:', error);
+                                this.isLoading = false;
+                            }
+                        } else {
+                            console.error('❌ Firebase config tidak ditemukan');
+                            this.isLoading = false;
+                        }
+                    },
 
-                async turnOffAllSprayers(blockName) {
-                    const block = this.firebaseBlocks.find(b => b.name === blockName);
-                    if (!block) return;
-                    
-                    for (const sprayer of block.sprayers) {
-                        await this.toggleRelay(blockName, sprayer.name, false);
-                    }
-                },
+                    // Keep old method for backward compatibility
+                    initializeFirebase(config) {
+                        this.initializeFirebaseWithModule(config, this._firebaseModule);
+                    },
 
-                formatTimestamp(timestamp) {
-                    if (!timestamp || timestamp === 0) {
-                        return new Date().toLocaleString('id-ID');
-                    }
-                    return new Date(timestamp * 1000).toLocaleString('id-ID');
-                },
+                    getLoadingKey(blockName, sprayerName) {
+                        return blockName + '/' + sprayerName;
+                    },
 
-                formatRelativeTime(epochTimestamp) {
-                    // Convert Unix Epoch timestamp to relative time
-                    // epochTimestamp is in seconds (Unix timestamp)
-                    
-                    if (!epochTimestamp || epochTimestamp === 0) {
-                        return 'Belum ada data';
+                    isSprayerLoading(blockName, sprayerName) {
+                        return this.loadingStates[this.getLoadingKey(blockName, sprayerName)] || false;
+                    },
+
+                    setSprayerLoading(blockName, sprayerName, loading) {
+                        const key = this.getLoadingKey(blockName, sprayerName);
+                        this.loadingStates[key] = loading;
+                        this.loadingStates = { ...this.loadingStates };
+                    },
+
+                    listenToBlocks() {
+                        window.FirebaseIoT.listenToMAOS((result) => {
+                            this.isLoading = false;
+                            
+                            if (result.blocks && result.blocks.length > 0) {
+                                result.blocks.forEach(block => {
+                                    const existing = this.firebaseBlocks.find(b => b.name === block.name);
+                                    block.isOpen = existing ? existing.isOpen : true;
+                                });
+                                
+                                this.firebaseBlocks = result.blocks;
+                            }
+                        });
+                    },
+
+                    async toggleRelay(blockName, sprayerName, turnOn) {
+                        if (this.isSprayerLoading(blockName, sprayerName)) return;
+
+                        this.setSprayerLoading(blockName, sprayerName, true);
+
+                        try {
+                            const success = await window.FirebaseIoT.controlRelay(blockName, sprayerName, turnOn);
+                            if (!success) {
+                                alert('Gagal mengubah status pompa');
+                            }
+                        } catch (error) {
+                            console.error('Error toggle relay:', error);
+                            alert('Error: ' + error.message);
+                        } finally {
+                            setTimeout(() => {
+                                this.setSprayerLoading(blockName, sprayerName, false);
+                            }, 500);
+                        }
+                    },
+
+                    async turnOnAllSprayers(blockName) {
+                        const block = this.firebaseBlocks.find(b => b.name === blockName);
+                        if (!block) return;
+                        
+                        for (const sprayer of block.sprayers) {
+                            await this.toggleRelay(blockName, sprayer.name, true);
+                        }
+                    },
+
+                    async turnOffAllSprayers(blockName) {
+                        const block = this.firebaseBlocks.find(b => b.name === blockName);
+                        if (!block) return;
+                        
+                        for (const sprayer of block.sprayers) {
+                            await this.toggleRelay(blockName, sprayer.name, false);
+                        }
+                    },
+
+                    formatTimestamp(timestamp) {
+                        if (!timestamp || timestamp === 0) {
+                            return new Date().toLocaleString('id-ID');
+                        }
+                        return new Date(timestamp * 1000).toLocaleString('id-ID');
+                    },
+
+                    formatRelativeTime(epochTimestamp) {
+                        if (!epochTimestamp || epochTimestamp === 0) {
+                            return 'Belum ada data';
+                        }
+                        
+                        const timestamp = Number(epochTimestamp);
+                        const nowInSeconds = Math.floor(Date.now() / 1000);
+                        const diffInSeconds = nowInSeconds - timestamp;
+                        
+                        if (diffInSeconds < 0) return 'Baru saja';
+                        
+                        const minutes = Math.floor(diffInSeconds / 60);
+                        
+                        if (minutes < 1) return 'Baru saja';
+                        if (minutes < 60) return `${minutes} menit yang lalu`;
+                        
+                        const hours = Math.floor(minutes / 60);
+                        if (hours < 24) return `${hours} jam yang lalu`;
+                        
+                        const days = Math.floor(hours / 24);
+                        if (days < 30) return `${days} hari yang lalu`;
+                        
+                        const months = Math.floor(days / 30);
+                        if (months === 1) return '1 bulan yang lalu';
+                        
+                        return `${months} bulan yang lalu`;
                     }
-                    
-                    // Convert to number if string
-                    const timestamp = Number(epochTimestamp);
-                    
-                    // Get current time in seconds
-                    const nowInSeconds = Math.floor(Date.now() / 1000);
-                    
-                    // Calculate difference in seconds
-                    const diffInSeconds = nowInSeconds - timestamp;
-                    
-                    // If timestamp is in the future or invalid
-                    if (diffInSeconds < 0) {
-                        return 'Baru saja';
-                    }
-                    
-                    // Convert to minutes
-                    const minutes = Math.floor(diffInSeconds / 60);
-                    
-                    // Less than 1 minute (0-59 seconds)
-                    if (minutes < 1) {
-                        return 'Baru saja';
-                    }
-                    
-                    // 1-59 minutes
-                    if (minutes < 60) {
-                        return `${minutes} menit yang lalu`;
-                    }
-                    
-                    // 1-23 hours (60-1439 minutes)
-                    const hours = Math.floor(minutes / 60);
-                    if (hours < 24) {
-                        return `${hours} jam yang lalu`;
-                    }
-                    
-                    // 1-29 days (24-719 hours)
-                    const days = Math.floor(hours / 24);
-                    if (days < 30) {
-                        return `${days} hari yang lalu`;
-                    }
-                    
-                    // 30+ days
-                    const months = Math.floor(days / 30);
-                    if (months === 1) {
-                        return '1 bulan yang lalu';
-                    }
-                    
-                    return `${months} bulan yang lalu`;
                 }
             }
-        }
-    </script>
+        </script>
 
-    @role(config('rbac.role.default'))
         <div class="max-w-7xl mx-auto" x-data="iotDashboard({{ Js::from($firebase ?? []) }})">
             <!-- Connection Status -->
             <div x-show="!isConnected && !isLoading" class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-4">
@@ -565,8 +577,6 @@
                 }
             }
         </script>
-
-        <!-- Alpine.js CDN -->
-        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @endrole
 @endsection
+

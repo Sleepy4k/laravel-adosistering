@@ -13,6 +13,7 @@
             <img 
                 src="{{ $profileImage ?? asset('assets/images/default-avatar.jpg') }}" 
                 alt="{{ $name }}"
+                loading="lazy"
                 class="w-full h-full object-cover"
                 onerror="this.src='{{ asset('assets/images/default-avatar.jpg') }}'"
             >

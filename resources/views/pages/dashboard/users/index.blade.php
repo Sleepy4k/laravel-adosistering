@@ -1,4 +1,4 @@
-@extends('layouts.superadmin')
+@extends('layouts.dashboard')
 
 @section('title', 'Manajemen User')
 
@@ -175,6 +175,7 @@
                         <div class="flex items-center gap-3">
                             <img :src="user.profileImage || '{{ asset('assets/images/default-avatar.jpg') }}'"
                                  :alt="user.name"
+                                 loading="lazy"
                                  class="w-10 h-10 rounded-full object-cover shrink-0">
                             <div>
                                 <p class="font-medium text-[#4F4F4F]" x-text="user.name"></p>

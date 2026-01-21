@@ -21,16 +21,22 @@ return [
             'active' => 'profile*',
         ],
         [
+            'label' => 'Statistik',
+            'icon' => 'statistic.svg',
+            'route' => 'user.statistik',
+            'active' => 'user.statistik*',
+        ],
+        [
             'label' => 'Notifikasi',
             'icon' => 'notification.svg',
-            'route' => '#',
+            'route' => 'user.notifications',
             'active' => 'user.notifications*',
         ],
         [
             'label' => 'Pengaturan',
             'icon' => 'settings.svg',
-            'route' => '#',
-            'active' => 'user.settings*',
+            'route' => 'user.pengaturan',
+            'active' => 'user.pengaturan*',
         ],
     ],
 
@@ -125,6 +131,7 @@ return [
             'route' => 'logout',
             'active' => 'logout',
             'danger' => true,
+            'logout' => true,
         ],
     ],
 ];
