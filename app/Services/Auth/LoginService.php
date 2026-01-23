@@ -13,14 +13,8 @@ class LoginService extends Service
      */
     public function index(): array
     {
-        $userIp = request()->ip();
-        $key = 'login-' . $userIp;
-        $rateLimiter = [
-            'reset_at' => RateLimiter::availableIn($key),
-            'remaining' => RateLimiter::remaining($key, config('auth.defaults.max_attempts')),
-        ];
-
-        return compact('rateLimiter');
+        // Tidak perlu return rate limiter data - sudah di-handle di controller
+        return [];
     }
 
     /**
@@ -38,7 +32,12 @@ class LoginService extends Service
 
         $user = auth('web')->user();
 
-        RateLimiter::clear('login-'.request()->ip());
+        // Clear rate limiter dengan key yang konsisten
+        $email = strtolower($request['email']);
+        $ip = request()->ip();
+        $throttleKey = 'login:' . $email . '|' . $ip;
+        RateLimiter::clear($throttleKey);
+        
         session()->regenerate();
 
         return $user;

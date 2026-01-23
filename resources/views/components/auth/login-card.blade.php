@@ -16,21 +16,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} - {{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-color': '#4F46E5',
-                        'primary-hover': '#4338CA',
-                        'primary-darker': '#3730A3'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Vite Assets (includes Tailwind CSS) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Custom Form Styles -->
     <style>

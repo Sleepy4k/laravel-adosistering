@@ -24,7 +24,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'max:100', Rule::exists(User::class, 'email')],
+            // REMOVED Rule::exists() - karena akan menghalangi rate limiter
+            // Rate limiter harus tetap di-hit meskipun email tidak ada di database
+            'email' => ['required', 'email', 'max:100'],
             'password' => ['required', 'string', 'min:8', 'max:64'],
         ];
     }
