@@ -4,7 +4,7 @@
     "name": "axios"
   },
   "resources/css/app.css": {
-    "file": "bundle/app-D89zAGap.css",
+    "file": "bundle/app-TqdVPwlN.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -83,7 +83,7 @@
     "isEntry": true
   },
   "resources/js/firebase.js": {
-    "file": "bundle/firebase-SRXG0tnG.js",
+    "file": "bundle/firebase-BQot05Ei.js",
     "name": "firebase",
     "src": "resources/js/firebase.js",
     "isEntry": true

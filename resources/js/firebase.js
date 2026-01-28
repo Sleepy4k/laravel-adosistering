@@ -154,13 +154,14 @@ export function listenToSensor(sprayerId, callback) {
 }
 
 /**
- * Control relay/pump status (uses string "ON" / "OFF")
- * @param {string} blockName - Block name (e.g., "Block A")
- * @param {string} sprayerName - Sprayer name (e.g., "Sprayer 1")
- * @param {boolean} isOn - Pump status
+ * Control relay/pump status (uses number 0/1)
+ * @param {string} blockName - Block name (e.g., "Block_A")
+ * @param {string} sprayerName - Sprayer name (e.g., "Sprayer_1")
+ * @param {boolean} isOn - Pump status (true = ON, false = OFF)
+ * @returns {Promise<boolean>} - Success status
  */
 export async function controlRelay(blockName, sprayerName, isOn) {
-    const relayValue = isOn ? "ON" : "OFF";
+    const relayValue = isOn ? 1 : 0; // Firebase expects 0 or 1 (number)
     return await setData(`MAOS/${blockName}/${sprayerName}/control/relay`, relayValue);
 }
 
@@ -228,24 +229,57 @@ export function listenToMAOS(callback) {
             // Get all sprayers in this block
             Object.keys(blockData).forEach(sprayerName => {
                 const sprayerData = blockData[sprayerName];
+                
+                // Parse relay status: 0 = OFF, 1 = ON
+                const relayValue = sprayerData?.control?.relay;
+                const relayStatus = (relayValue === 1 || relayValue === '1') ? 'ON' : 'OFF';
+                
+                // Parse numeric values from Firebase (handle string or number)
+                const moisture = parseFloat(sprayerData?.data?.moisture_percent || 0);
+                const flowRate = parseFloat(sprayerData?.data?.flow_Lmin || 0);
+                const totalVolume = parseFloat(sprayerData?.data?.totalVolume_L || 0);
+                const moistureStatus = sprayerData?.data?.moisture_status || 'Kering';
+                
                 sprayers.push({
                     name: sprayerName,
-                    relay: sprayerData?.control?.relay || 'OFF',
-                    moisture: sprayerData?.data?.moisture || 0,
-                    flowRate: sprayerData?.data?.flowRate || 0,
-                    totalVolume: sprayerData?.data?.totalVolume || 0,
+                    relay: relayStatus,
+                    moisture: moisture,
+                    moistureStatus: moistureStatus,
+                    flowRate: flowRate,
+                    totalVolume: totalVolume,
                     timestamp: sprayerData?.data?.timestamp || 0,
                     arahAngin: sprayerData?.data?.arah_angin || '',
-                    kecepatanKmh: sprayerData?.data?.kecepatan_kmh || 0,
-                    kecepatanMps: sprayerData?.data?.kecepatan_mps || 0,
+                    kecepatanKmh: parseFloat(sprayerData?.data?.kecepatan_kmh || 0),
+                    kecepatanMps: parseFloat(sprayerData?.data?.kecepatan_mps || 0),
+                    flowMls: parseFloat(sprayerData?.data?.flow_mLs || 0),
+                    sensorConnected: sprayerData?.data?.sensor_connected !== false,
+                    autoIrrigation: sprayerData?.control?.autoIrrigation || false,
                 });
             });
             
             // Calculate block averages
             const sprayerCount = sprayers.length || 1;
-            const avgMoisture = sprayers.reduce((sum, s) => sum + (parseFloat(s.moisture) || 0), 0) / sprayerCount;
-            const avgFlowRate = sprayers.reduce((sum, s) => sum + (parseFloat(s.flowRate) || 0), 0) / sprayerCount;
-            const totalVolume = sprayers.reduce((sum, s) => sum + (parseFloat(s.totalVolume) || 0), 0);
+            
+            // Average moisture percentage
+            const avgMoisture = sprayers.reduce((sum, s) => sum + s.moisture, 0) / sprayerCount;
+            
+            // Average flow rate (L/min)
+            const avgFlowRate = sprayers.reduce((sum, s) => sum + s.flowRate, 0) / sprayerCount;
+            
+            // Total volume from all sprayers (L)
+            const totalVolume = sprayers.reduce((sum, s) => sum + s.totalVolume, 0);
+            
+            // Calculate moisture status badge for block
+            // Count how many sprayers are "Lembab" vs "Kering"
+            const lembabCount = sprayers.filter(s => 
+                s.moistureStatus === 'Lembab' || s.moisture >= 60
+            ).length;
+            const keringCount = sprayers.filter(s => 
+                s.moistureStatus === 'Kering' || s.moisture < 60
+            ).length;
+            
+            // Majority rule: if more than half are lembab, show "Lembab", otherwise "Kering"
+            const blockMoistureStatus = lembabCount > keringCount ? 'Lembab' : 'Kering';
             
             blocks.push({
                 name: blockName,
@@ -253,6 +287,7 @@ export function listenToMAOS(callback) {
                 avgMoisture: avgMoisture,
                 avgFlowRate: avgFlowRate,
                 totalVolume: totalVolume,
+                moistureStatus: blockMoistureStatus,
             });
         });
         
