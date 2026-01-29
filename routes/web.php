@@ -48,12 +48,14 @@ Route::middleware('auth')->group(function () {
         ->parameters(['profile' => 'profileType']);
 
     Route::get('/irrigation-history', Dashboard\IrrigationHistoryController::class)->name('irrigation-history');
-    
+
     Route::get('/statistik', Dashboard\StatistikController::class)->name('user.statistik');
-    
+
     Route::get('/notifications', Dashboard\NotificationController::class)->name('user.notifications');
-    
-    Route::get('/pengaturan', Dashboard\PengaturanController::class)->name('user.pengaturan');
+
+    Route::resource('pengaturan', Dashboard\IrrigationSettingController::class)
+        ->only(['index', 'update'])
+        ->names(['index' => 'user.pengaturan', 'update' => 'user.pengaturan.update']);
 
     Route::resource('users', Dashboard\UserController::class)->except('show');
     Route::post('/users/{user}/status', [Dashboard\UserController::class, 'setActiveStatus'])->name('users.status');
