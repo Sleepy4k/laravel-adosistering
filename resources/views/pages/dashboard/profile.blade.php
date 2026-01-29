@@ -11,7 +11,7 @@
             nama_lengkap: '{{ $user->name ?? 'User' }}',
             nomor_whatsapp: '{{ $user->phone ?? '-' }}',
             email: '{{ $user->email ?? '-' }}',
-            bio: '{{ $user->bio ?? '-' }}',
+            bio: '{{ $user->details->address ?? '-' }}',
             negara: '{{ $user->country ?? 'Indonesia' }}',
             provinsi: '{{ $user->province ?? '-' }}',
             kota: '{{ $user->city ?? '-' }}',
@@ -84,7 +84,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-[#4F4F4F]">Informasi Pribadi</h2>
                 @can('profile.edit.basic')
-                <button 
+                <button
                     x-show="!editInformasiPribadi"
                     @click="editInformasiPribadi = true"
                     class="flex items-center gap-2 px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
@@ -95,13 +95,13 @@
                     <span>Edit</span>
                 </button>
                 <div x-show="editInformasiPribadi" class="flex items-center gap-2">
-                    <button 
+                    <button
                         @click="resetInformasiPribadi()"
                         class="px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
                     >
                         Batal
                     </button>
-                    <button 
+                    <button
                         @click="simpanInformasiPribadi()"
                         class="px-4 py-2 bg-[#67B744] text-white rounded-xl text-sm hover:bg-[#5aa33d] transition-colors"
                     >
@@ -119,8 +119,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.nama_lengkap"></span>
                     </template>
                     <template x-if="editInformasiPribadi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.nama_lengkap"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -133,8 +133,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.nomor_whatsapp"></span>
                     </template>
                     <template x-if="editInformasiPribadi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.nomor_whatsapp"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -147,8 +147,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.email"></span>
                     </template>
                     <template x-if="editInformasiPribadi">
-                        <input 
-                            type="email" 
+                        <input
+                            type="email"
                             x-model="profile.email"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -161,8 +161,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.bio"></span>
                     </template>
                     <template x-if="editInformasiPribadi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.bio"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -178,7 +178,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-[#4F4F4F]">Lokasi</h2>
                 @can('profile.edit.other')
-                <button 
+                <button
                     x-show="!editLokasi"
                     @click="editLokasi = true"
                     class="flex items-center gap-2 px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
@@ -189,13 +189,13 @@
                     <span>Edit</span>
                 </button>
                 <div x-show="editLokasi" class="flex items-center gap-2">
-                    <button 
+                    <button
                         @click="resetLokasi()"
                         class="px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
                     >
                         Batal
                     </button>
-                    <button 
+                    <button
                         @click="simpanLokasi()"
                         class="px-4 py-2 bg-[#67B744] text-white rounded-xl text-sm hover:bg-[#5aa33d] transition-colors"
                     >
@@ -213,8 +213,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.negara"></span>
                     </template>
                     <template x-if="editLokasi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.negara"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -227,8 +227,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.provinsi"></span>
                     </template>
                     <template x-if="editLokasi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.provinsi"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -241,8 +241,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.kota"></span>
                     </template>
                     <template x-if="editLokasi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.kota"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -255,8 +255,8 @@
                         <span class="text-base font-medium text-[#4F4F4F]" x-text="profile.kode_pos"></span>
                     </template>
                     <template x-if="editLokasi">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             x-model="profile.kode_pos"
                             class="w-full h-11 px-4 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
@@ -271,7 +271,7 @@
         <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-6 mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-[#4F4F4F]">Keamanan</h2>
-                <button 
+                <button
                     @click="showUbahPassword = true"
                     class="px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
                 >
@@ -282,8 +282,8 @@
         @endcan
 
         <!-- Modal Ubah Kata Sandi -->
-        <div 
-            x-show="showUbahPassword" 
+        <div
+            x-show="showUbahPassword"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -294,7 +294,7 @@
             @click.self="showUbahPassword = false"
             style="display: none;"
         >
-            <div 
+            <div
                 x-show="showUbahPassword"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 scale-95"
@@ -313,18 +313,18 @@
                 }"
             >
                 <h3 class="text-lg font-semibold text-[#4F4F4F] mb-6">Ubah Kata Sandi</h3>
-                
+
                 <!-- Password Lama -->
                 <div class="flex flex-col gap-2 mb-4">
                     <label class="text-sm font-medium text-[#4F4F4F]">Kata Sandi Lama</label>
                     <div class="relative">
-                        <input 
-                            :type="showPasswordLama ? 'text' : 'password'" 
+                        <input
+                            :type="showPasswordLama ? 'text' : 'password'"
                             x-model="passwordLama"
                             placeholder="Masukkan kata sandi lama"
                             class="w-full h-11 px-4 pr-12 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
-                        <button 
+                        <button
                             type="button"
                             @click="showPasswordLama = !showPasswordLama"
                             class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -344,13 +344,13 @@
                 <div class="flex flex-col gap-2 mb-4">
                     <label class="text-sm font-medium text-[#4F4F4F]">Kata Sandi Baru</label>
                     <div class="relative">
-                        <input 
-                            :type="showPasswordBaru ? 'text' : 'password'" 
+                        <input
+                            :type="showPasswordBaru ? 'text' : 'password'"
                             x-model="passwordBaru"
                             placeholder="Masukkan kata sandi baru"
                             class="w-full h-11 px-4 pr-12 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
-                        <button 
+                        <button
                             type="button"
                             @click="showPasswordBaru = !showPasswordBaru"
                             class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -370,13 +370,13 @@
                 <div class="flex flex-col gap-2 mb-6">
                     <label class="text-sm font-medium text-[#4F4F4F]">Konfirmasi Kata Sandi Baru</label>
                     <div class="relative">
-                        <input 
-                            :type="showKonfirmasiPassword ? 'text' : 'password'" 
+                        <input
+                            :type="showKonfirmasiPassword ? 'text' : 'password'"
                             x-model="konfirmasiPassword"
                             placeholder="Konfirmasi kata sandi baru"
                             class="w-full h-11 px-4 pr-12 bg-white border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] focus:outline-none focus:ring-2 focus:ring-[#67B744] focus:border-[#67B744]"
                         />
-                        <button 
+                        <button
                             type="button"
                             @click="showKonfirmasiPassword = !showKonfirmasiPassword"
                             class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -394,13 +394,13 @@
 
                 <!-- Buttons -->
                 <div class="flex justify-end gap-3">
-                    <button 
+                    <button
                         @click="showUbahPassword = false; passwordLama = ''; passwordBaru = ''; konfirmasiPassword = '';"
                         class="px-4 py-2 border border-[#C2C2C2] rounded-xl text-sm text-[#4F4F4F] hover:bg-gray-50 transition-colors"
                     >
                         Batal
                     </button>
-                    <button 
+                    <button
                         @click="showUbahPassword = false; passwordLama = ''; passwordBaru = ''; konfirmasiPassword = '';"
                         class="px-4 py-2 bg-[#67B744] text-white rounded-xl text-sm hover:bg-[#5aa33d] transition-colors"
                     >
