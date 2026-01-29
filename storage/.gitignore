@@ -1,8 +1,10 @@
 *
 !app/
+!app/**
 !docker/
 !logs/
 !framework/
+!framework/**
 !backups/
 !uploader/
 !.gitignore
