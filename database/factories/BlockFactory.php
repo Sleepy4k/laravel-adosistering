@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -18,6 +19,9 @@ class BlockFactory extends Factory
      */
     public function definition(): array
     {
+        $regionId = Region::query()
+            ->select('id')
+            ->value('id');
         $userId = User::query()
             ->select('id')
             ->role(config('rbac.role.default'))
@@ -63,6 +67,7 @@ class BlockFactory extends Factory
             ], $entry);
 
             $entry['id'] = $uuids[$index];
+            $entry['region_id'] = $regionId;
             $entry['user_id'] = $userId;
             $entry['created_at'] = $currentTime;
             $entry['updated_at'] = $currentTime;

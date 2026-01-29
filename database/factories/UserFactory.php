@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Region;
 use App\Models\UserType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -23,6 +24,9 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $regionId = Region::query()
+            ->select('id')
+            ->value('id');
         $typeId = UserType::query()
             ->where('name', 'Individu')
             ->value('id');
@@ -65,6 +69,10 @@ class UserFactory extends Factory
             $entry['user_type_id'] = $typeId;
             $entry['created_at'] = $currentTime;
             $entry['updated_at'] = $currentTime;
+
+            if ($entry['role'] === 'user') {
+                $entry['region_id'] = $regionId;
+            }
         }
 
         unset($entry);
