@@ -8,7 +8,7 @@ use App\Concerns\MakeCacheable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Block extends Model
+class Region extends Model
 {
     use HasFactory, HasUuid, Loggable, MakeCacheable;
 
@@ -18,10 +18,7 @@ class Block extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'user_id',
-        'code',
         'name',
-        'location',
     ];
 
     /**
@@ -40,44 +37,17 @@ class Block extends Model
     {
         return [
             'id' => 'string',
-            'user_id' => 'string',
-            'code' => 'string',
             'name' => 'string',
-            'location' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
 
     /**
-     * Get the region that owns the block.
+     * Get the blocks for the region.
      */
-    public function region()
+    public function blocks()
     {
-        return $this->belongsTo(Region::class);
-    }
-
-    /**
-     * Get the user that owns the block.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the coordinate for the block.
-     */
-    public function coordinate()
-    {
-        return $this->hasOne(Coordinate::class);
-    }
-
-    /**
-     * Get the sprayers for the block.
-     */
-    public function sprayers()
-    {
-        return $this->hasMany(Sprayer::class);
+        return $this->hasMany(Block::class);
     }
 }
