@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\IrrigationType;
 use App\Models\Sprayer;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,13 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sensors', function (Blueprint $table) {
+        Schema::create('irrigation_histories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignIdFor(Sprayer::class)->constrained()->cascadeOnDelete();
-            $table->float('humidity')->default(0);
-            $table->float('flow_rate')->default(0);
-            $table->float('volume')->default(0);
-            $table->enum('status', ['online', 'error', 'offline'])->default('offline');
+            $table->float('moisture');
+            $table->float('flow_rate');
+            $table->float('water_volume');
+            $table->timestamp('irrigated_at');
+            $table->timestamp('stopped_at')->nullable();
+            $table->enum('type', IrrigationType::toArray())->default(IrrigationType::MANUAL->value);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sensors');
+        Schema::dropIfExists('irrigation_histories');
     }
 };

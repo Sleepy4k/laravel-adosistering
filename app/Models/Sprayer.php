@@ -20,8 +20,6 @@ class Sprayer extends Model
     protected $fillable = [
         'block_id',
         'name',
-        'is_pump',
-        'is_auto_irrigation',
     ];
 
     /**
@@ -42,8 +40,8 @@ class Sprayer extends Model
             'id' => 'string',
             'block_id' => 'string',
             'name' => 'string',
-            'is_pump' => 'boolean',
-            'is_auto_irrigation' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -53,13 +51,5 @@ class Sprayer extends Model
     public function block()
     {
         return $this->belongsTo(Block::class);
-    }
-
-    /**
-     * Get the sensor for the sprayer.
-     */
-    public function sensor()
-    {
-        return $this->hasOne(Sensor::class);
     }
 }

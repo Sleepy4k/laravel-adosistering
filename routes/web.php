@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/logout', Auth\LogoutController::class)->name('logout');
 
     Route::get('/', Dashboard\HomeController::class)->name('home');
+    Route::post('/dashboard/update/{block}', [Dashboard\HomeController::class, 'update'])->name('dashboard.update');
 
     Route::resource('profile', Dashboard\ProfileController::class)
         ->only(['index', 'update'])

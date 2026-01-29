@@ -16,8 +16,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignIdFor(Block::class)->constrained()->cascadeOnDelete();
             $table->string('name', 100);
-            $table->boolean('is_pump_on')->default(false);
-            $table->boolean('is_auto_irrigation')->default(false);
             $table->timestamps();
         });
     }

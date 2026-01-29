@@ -55,8 +55,6 @@ class SprayerFactory extends Factory
         foreach ($data as $index => &$entry) {
             $entry = array_merge([
                 'block_id' => $blocks[$index],
-                'is_pump_on' => false,
-                'is_auto_irrigation' => false,
             ], $entry);
 
             $entry['id'] = $uuids[$index];

@@ -220,26 +220,26 @@ export function listenToMAOS(callback) {
         }
 
         const blocks = [];
-        
+
         // Parse Firebase structure: MAOS/{BlockName}/{SprayerName}/...
         Object.keys(data).forEach(blockName => {
             const blockData = data[blockName];
             const sprayers = [];
-            
+
             // Get all sprayers in this block
             Object.keys(blockData).forEach(sprayerName => {
                 const sprayerData = blockData[sprayerName];
-                
+
                 // Parse relay status: 0 = OFF, 1 = ON
                 const relayValue = sprayerData?.control?.relay;
                 const relayStatus = (relayValue === 1 || relayValue === '1') ? 'ON' : 'OFF';
-                
+
                 // Parse numeric values from Firebase (handle string or number)
                 const moisture = parseFloat(sprayerData?.data?.moisture_percent || 0);
                 const flowRate = parseFloat(sprayerData?.data?.flow_Lmin || 0);
                 const totalVolume = parseFloat(sprayerData?.data?.totalVolume_L || 0);
                 const moistureStatus = sprayerData?.data?.moisture_status || 'Kering';
-                
+
                 sprayers.push({
                     name: sprayerName,
                     relay: relayStatus,
@@ -256,31 +256,31 @@ export function listenToMAOS(callback) {
                     autoIrrigation: sprayerData?.control?.autoIrrigation || false,
                 });
             });
-            
+
             // Calculate block averages
             const sprayerCount = sprayers.length || 1;
-            
+
             // Average moisture percentage
             const avgMoisture = sprayers.reduce((sum, s) => sum + s.moisture, 0) / sprayerCount;
-            
+
             // Average flow rate (L/min)
             const avgFlowRate = sprayers.reduce((sum, s) => sum + s.flowRate, 0) / sprayerCount;
-            
+
             // Total volume from all sprayers (L)
             const totalVolume = sprayers.reduce((sum, s) => sum + s.totalVolume, 0);
-            
+
             // Calculate moisture status badge for block
             // Count how many sprayers are "Lembab" vs "Kering"
-            const lembabCount = sprayers.filter(s => 
+            const lembabCount = sprayers.filter(s =>
                 s.moistureStatus === 'Lembab' || s.moisture >= 60
             ).length;
-            const keringCount = sprayers.filter(s => 
+            const keringCount = sprayers.filter(s =>
                 s.moistureStatus === 'Kering' || s.moisture < 60
             ).length;
-            
+
             // Majority rule: if more than half are lembab, show "Lembab", otherwise "Kering"
             const blockMoistureStatus = lembabCount > keringCount ? 'Lembab' : 'Kering';
-            
+
             blocks.push({
                 name: blockName,
                 sprayers: sprayers,
@@ -290,10 +290,10 @@ export function listenToMAOS(callback) {
                 moistureStatus: blockMoistureStatus,
             });
         });
-        
+
         // Sort blocks by name
         blocks.sort((a, b) => a.name.localeCompare(b.name));
-        
+
         callback({ blocks });
     });
 }

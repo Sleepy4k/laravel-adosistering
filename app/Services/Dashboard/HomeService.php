@@ -4,6 +4,9 @@ namespace App\Services\Dashboard;
 
 use App\Foundations\Service;
 use App\Models\Block;
+use App\Models\IrrigationHistory;
+use App\Models\Sprayer;
+use Illuminate\Support\Facades\DB;
 
 class HomeService extends Service
 {
@@ -16,70 +19,70 @@ class HomeService extends Service
         $userRole = $user->roles->first()->name;
 
         return match ($userRole) {
-            config('rbac.role.default') => $this->getUserData($user->id),
+            config('rbac.role.default') => $this->getUserData(),
             config('rbac.role.highest') => $this->getSuperadminData(),
             default => $this->getAdminData(),
         };
     }
 
     /**
+     * Update the specified resource in storage.
+     */
+    public function update(array $request, string $block): bool
+    {
+        try {
+            if (empty($request['sprayer']) || !is_array($request['sprayer'])) {
+                return false;
+            }
+
+            $user = auth('web')->user();
+            $userId = $user->id;
+            $regionId = $user->region_id;
+
+            DB::beginTransaction();
+
+            foreach ($request['sprayer'] as $sprayerData) {
+                $name = $sprayerData['name'] ?? null;
+                if (!$name) {
+                    continue;
+                }
+
+                $blockModel = Block::firstOrCreate(
+                    ['user_id' => $userId, 'name' => $block],
+                    ['region_id' => $regionId, 'code' => strtoupper(substr($block, 0, 3))]
+                );
+
+                $sprayerModel = Sprayer::firstOrCreate(
+                    ['block_id' => $blockModel->id, 'name' => $name]
+                );
+
+                IrrigationHistory::create([
+                    'sprayer_id'    => $sprayerModel->id,
+                    'moisture'      => $sprayerData['moisture'] ?? null,
+                    'flow_rate'     => $sprayerData['flow_rate'] ?? null,
+                    'type'          => $sprayerData['irrigation_type'] ?? null,
+                    'water_volume'  => $sprayerData['water_volume'] ?? null,
+                    'irrigation_at' => $sprayerData['irrigation_at'] ?? null,
+                    'stopped_at'    => $sprayerData['stopped_at'] ?? null,
+                ]);
+            }
+
+            DB::commit();
+
+            return true;
+        } catch (\Throwable $th) {
+            return false;
+        }
+    }
+
+    /**
      * Get data for regular user.
      */
-    private function getUserData($userId): array
+    private function getUserData(): array
     {
-        $coordinates = [];
-        $data = Block::query()
-            ->with('coordinate', 'sprayers', 'sprayers.sensor')
-            ->where('user_id', $userId)
-            ->get();
-
-        foreach ($data as $block) {
-            if ($block->coordinate) {
-                $coordinates[] = [
-                    'id' => $block->id,
-                    'name' => $block->name,
-                    'opacity' => $block->coordinate->opacity,
-                    'marker' => $block->coordinate->marker,
-                    'color' => $block->coordinate->color,
-                    'points' => $block->coordinate->points,
-                ];
-            }
-        }
-
-        $blocks = $data->map(function ($block) {
-            return [
-                'blockId' => $block->id,
-                'blockName' => $block->name,
-                'avgHumidity' => $block->sprayers->flatMap(function ($sprayer) {
-                    return $sprayer->sensor ? [$sprayer->sensor->humidity] : [];
-                })->avg(),
-                'avgFlowRate' => $block->sprayers->flatMap(function ($sprayer) {
-                    return $sprayer->sensor ? [$sprayer->sensor->flow_rate] : [];
-                })->avg(),
-                'totalVolume' => $block->sprayers->flatMap(function ($sprayer) {
-                    return $sprayer->sensor ? [$sprayer->sensor->volume] : [];
-                })->sum(),
-                'sprayers' => $block->sprayers->map(function ($sprayer) use ($block) {
-                    return [
-                        'id' => $sprayer->id,
-                        'name' => $sprayer->name,
-                        'location' => $block->location,
-                        'sensorStatus' => $sprayer->sensor ? $sprayer->sensor->status : 'offline',
-                        'humidity' => $sprayer->sensor ? $sprayer->sensor->humidity : 0,
-                        'flowRate' => $sprayer->sensor ? $sprayer->sensor->flow_rate : 0,
-                        'volume' => $sprayer->sensor ? $sprayer->sensor->volume : 0,
-                        'pumpStatus' => $sprayer->is_pump_on ? 'Aktif' : 'Mati',
-                        'lastUpdate' => $sprayer->sensor ? $sprayer->sensor->updated_at->toDateTimeString() : null,
-                        'isPumpOn' => $sprayer->is_pump_on,
-                        'isAutoIrrigation' => $sprayer->is_auto_irrigation,
-                    ];
-                })->toArray(),
-            ];
-        })->toArray();
-
         $firebase = $this->getFirebaseConfig();
 
-        return compact('blocks', 'coordinates', 'firebase');
+        return compact('firebase');
     }
 
     /**
@@ -87,7 +90,9 @@ class HomeService extends Service
      */
     private function getSuperadminData(): array
     {
-        return $this->getFirebaseConfig();
+        $firebase = $this->getFirebaseConfig();
+
+        return compact('firebase');
     }
 
     /**
@@ -95,7 +100,9 @@ class HomeService extends Service
      */
     private function getAdminData(): array
     {
-        return $this->getFirebaseConfig();
+        $firebase = $this->getFirebaseConfig();
+
+        return compact('firebase');
     }
 
     /**

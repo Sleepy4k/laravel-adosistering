@@ -33,7 +33,6 @@ class DatabaseSeeder extends Seeder
             BlockSeeder::class,
             CoordinateSeeder::class,
             SprayerSeeder::class,
-            SensorSeeder::class,
         ]);
     }
 }

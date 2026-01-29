@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Foundations\Controller;
+use App\Http\Requests\Dashboard\IrrigationSetting\UpdateRequest;
 use App\Models\IrrigationSetting;
 use App\Services\Dashboard\IrrigationSettingService;
 use App\Traits\Authorizable;
-use Illuminate\Http\Request;
 
 class IrrigationSettingController extends Controller
 {
@@ -35,8 +35,22 @@ class IrrigationSettingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateRequest $request, string $pengaturan)
     {
-        return false;
+        if (!in_array($pengaturan, ['control', 'safety'])) {
+            session()->flash('error', 'Invalid setting type.');
+            return back()->withInput();
+        }
+
+        $result = $this->service->update($request->validated(), $pengaturan);
+
+        if (!$result) {
+            session()->flash('error', 'Failed to update irrigation settings.');
+            return back()->withInput();
+        }
+
+        session()->flash('success', 'Irrigation settings updated successfully.');
+
+        return to_route('user.pengaturan');
     }
 }

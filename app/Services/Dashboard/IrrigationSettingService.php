@@ -43,8 +43,29 @@ class IrrigationSettingService extends Service
     /**
      * Update the specified resource in storage.
      */
-    public function update(array $request, int $id): bool
+    public function update(array $request, string $pengaturan): bool
     {
-        return false;
+        $settings = IrrigationSetting::query()
+            ->where('user_id', auth('web')->id())
+            ->first();
+
+        if (!$settings) {
+            return false;
+        }
+
+        if ($pengaturan === 'control') {
+            $settings->moisture_min = $request['moisture_min'];
+            $settings->moisture_max = $request['moisture_max'];
+            $settings->moisture_dry = $request['moisture_dry'];
+            $settings->moisture_normal = $request['moisture_normal'];
+            $settings->moisture_wet = $request['moisture_wet'];
+        } elseif ($pengaturan === 'safety') {
+            $settings->safety_timeout_min = $request['safety_timeout_min'];
+            $settings->safety_timeout_max = $request['safety_timeout_max'];
+        } else {
+            return false;
+        }
+
+        return $settings->save();
     }
 }
