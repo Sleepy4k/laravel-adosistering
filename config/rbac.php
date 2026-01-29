@@ -47,6 +47,9 @@ return [
             'user.filter',
 
             'statistic.view',
+
+            'irrigation_setting.view',
+            'irrigation_setting.update',
         ],
     ],
 
@@ -121,6 +124,9 @@ return [
             'profile.edit.basic',
             'profile.edit.other',
             'profile.edit.credential',
+
+            'irrigation_setting.view',
+            'irrigation_setting.update',
         ],
     ],
 ];
