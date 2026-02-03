@@ -160,133 +160,39 @@
                         }
                     },
 
-                    formatTimestamp(epochTimestamp) {
+                    formatTimestamp(timestamp) {
+                        if (!timestamp || timestamp === 0) {
+                            return new Date().toLocaleString('id-ID');
+                        }
+                        return new Date(timestamp * 1000).toLocaleString('id-ID');
+                    },
+
+                    formatRelativeTime(epochTimestamp) {
                         if (!epochTimestamp || epochTimestamp === 0) {
                             return 'Belum ada data';
                         }
                         
-                        // Handle various timestamp formats
-                        let timestamp;
+                        const timestamp = Number(epochTimestamp);
+                        const nowInSeconds = Math.floor(Date.now() / 1000);
+                        const diffInSeconds = nowInSeconds - timestamp;
                         
-                        // If it's a string, try to parse it
-                        if (typeof epochTimestamp === 'string') {
-                            // Check if it's already in DD-MM-YYYY HH:MM:SS format
-                            if (epochTimestamp.match(/^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/)) {
-                                return epochTimestamp;
-                            }
-                            // Try to parse as number
-                            timestamp = parseInt(epochTimestamp);
-                            if (isNaN(timestamp)) {
-                                return 'Format tidak valid';
-                            }
-                        } else {
-                            timestamp = Number(epochTimestamp);
-                        }
-                        
-                        // Check if timestamp is in milliseconds (13 digits) or seconds (10 digits)
-                        let date;
-                        if (timestamp > 9999999999) {
-                            // Milliseconds
-                            date = new Date(timestamp);
-                        } else {
-                            // Seconds
-                            date = new Date(timestamp * 1000);
-                        }
-                        
-                        // Validate date
-                        if (isNaN(date.getTime())) {
-                            return 'Format tidak valid';
-                        }
-                        
-                        // Format: DD-MM-YYYY HH:MM:SS
-                        const day = String(date.getDate()).padStart(2, '0');
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const year = date.getFullYear();
-                        const hours = String(date.getHours()).padStart(2, '0');
-                        const minutes = String(date.getMinutes()).padStart(2, '0');
-                        const seconds = String(date.getSeconds()).padStart(2, '0');
-                        
-                        return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-                    },
-
-                    formatRelativeTime(timestamp) {
-                        if (!timestamp || timestamp === 0) {
-                            return 'Belum ada data';
-                        }
-                        
-                        let date;
-                        
-                        // Check if timestamp is a string in format DD-MM-YYYY HH:MM:SS
-                        if (typeof timestamp === 'string' && timestamp.match(/^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/)) {
-                            // Parse DD-MM-YYYY HH:MM:SS format
-                            const parts = timestamp.split(' ');
-                            const dateParts = parts[0].split('-');
-                            const timeParts = parts[1].split(':');
-                            
-                            // Create date object (month is 0-indexed in JavaScript)
-                            date = new Date(
-                                parseInt(dateParts[2]), // year
-                                parseInt(dateParts[1]) - 1, // month (0-indexed)
-                                parseInt(dateParts[0]), // day
-                                parseInt(timeParts[0]), // hours
-                                parseInt(timeParts[1]), // minutes
-                                parseInt(timeParts[2])  // seconds
-                            );
-                        } else if (typeof timestamp === 'number' || !isNaN(Number(timestamp))) {
-                            // Handle epoch timestamp (seconds or milliseconds)
-                            const numTimestamp = Number(timestamp);
-                            if (numTimestamp > 9999999999) {
-                                // Milliseconds
-                                date = new Date(numTimestamp);
-                            } else {
-                                // Seconds
-                                date = new Date(numTimestamp * 1000);
-                            }
-                        } else {
-                            return 'Format tidak valid';
-                        }
-                        
-                        // Validate date
-                        if (isNaN(date.getTime())) {
-                            return 'Format tidak valid';
-                        }
-                        
-                        const now = new Date();
-                        const diffInSeconds = Math.floor((now - date) / 1000);
-                        
-                        // Handle future timestamps
                         if (diffInSeconds < 0) return 'Baru saja';
                         
-                        // Less than a minute
-                        if (diffInSeconds < 60) return 'Baru saja';
-                        
-                        // Minutes
                         const minutes = Math.floor(diffInSeconds / 60);
-                        if (minutes < 60) {
-                            return `${minutes} menit yang lalu`;
-                        }
                         
-                        // Hours
+                        if (minutes < 1) return 'Baru saja';
+                        if (minutes < 60) return `${minutes} menit yang lalu`;
+                        
                         const hours = Math.floor(minutes / 60);
-                        if (hours < 24) {
-                            return `${hours} jam yang lalu`;
-                        }
+                        if (hours < 24) return `${hours} jam yang lalu`;
                         
-                        // Days
                         const days = Math.floor(hours / 24);
-                        if (days < 30) {
-                            return `${days} hari yang lalu`;
-                        }
+                        if (days < 30) return `${days} hari yang lalu`;
                         
-                        // Months
                         const months = Math.floor(days / 30);
-                        if (months < 12) {
-                            return `${months} bulan yang lalu`;
-                        }
+                        if (months === 1) return '1 bulan yang lalu';
                         
-                        // Years
-                        const years = Math.floor(months / 12);
-                        return `${years} tahun yang lalu`;
+                        return `${months} bulan yang lalu`;
                     }
                 }
             }
@@ -379,8 +285,8 @@
                                 <div class="flex items-end justify-between">
                                     <p class="text-2xl font-bold text-[#4F4F4F]" x-text="block.avgMoisture.toFixed(2) + '%'"></p>
                                     <span class="px-2 py-1 text-xs font-medium rounded-full" 
-                                          :class="block.moistureStatus === 'Lembab' ? 'bg-[#D4F4DD] text-[#186D3C]' : 'bg-[#FDF1B9] text-[#947E11]'"
-                                          x-text="block.moistureStatus"></span>
+                                          :class="block.avgMoisture >= 60 ? 'bg-[#D4F4DD] text-[#186D3C]' : 'bg-[#FDF1B9] text-[#947E11]'"
+                                          x-text="block.avgMoisture >= 60 ? 'Lembab' : 'Kering'"></span>
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl border border-gray-200 p-4">
@@ -447,7 +353,7 @@
 
                                         {{-- Last Update (Float Right) --}}
                                         <div class="mb-4 text-right">
-                                            <p class="text-xs text-[#4F4F4F] italic" x-text="'Terakhir update: ' + formatRelativeTime(sprayer.timestamp)"></p>
+                                            <p class="text-xs text-[#4F4F4F] italic" x-text="'Terakhir update ' + formatRelativeTime(sprayer.timestamp)"></p>
                                         </div>
 
                                         {{-- Controls - Toggle and Checkbox in one row --}}
