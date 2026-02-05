@@ -26,12 +26,12 @@ return [
             'route' => 'user.statistik',
             'active' => 'user.statistik*',
         ],
-        [
-            'label' => 'Notifikasi',
-            'icon' => 'notification.svg',
-            'route' => 'user.notifications',
-            'active' => 'user.notifications*',
-        ],
+        // [
+        //     'label' => 'Notifikasi',
+        //     'icon' => 'notification.svg',
+        //     'route' => 'user.notifications',
+        //     'active' => 'user.notifications*',
+        // ],
         [
             'label' => 'Pengaturan',
             'icon' => 'settings.svg',
@@ -65,12 +65,12 @@ return [
             'route' => '#',
             'active' => 'admin.statistics*',
         ],
-        [
-            'label' => 'Notifikasi',
-            'icon' => 'notification.svg',
-            'route' => '#',
-            'active' => 'admin.notifications*',
-        ],
+        // [
+        //     'label' => 'Notifikasi',
+        //     'icon' => 'notification.svg',
+        //     'route' => '#',
+        //     'active' => 'admin.notifications*',
+        // ],
         [
             'label' => 'Pengaturan',
             'icon' => 'settings.svg',
@@ -104,12 +104,12 @@ return [
             'route' => '#',
             'active' => 'superadmin.statistics*',
         ],
-        [
-            'label' => 'Notifikasi',
-            'icon' => 'notification.svg',
-            'route' => '#',
-            'active' => 'superadmin.notifications*',
-        ],
+        // [
+        //     'label' => 'Notifikasi',
+        //     'icon' => 'notification.svg',
+        //     'route' => '#',
+        //     'active' => 'superadmin.notifications*',
+        // ],
         [
             'label' => 'Pengaturan',
             'icon' => 'settings.svg',

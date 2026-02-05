@@ -3,6 +3,12 @@
 @section('title', 'Pengaturan')
 
 @section('content')
+    {{-- Store Firebase module path from Vite --}}
+    <script>
+        window.__FIREBASE_MODULE_PATH__ = "{{ Vite::asset('resources/js/firebase.js') }}";
+        window.__FIREBASE_CONFIG__ = @json(config('firebase'));
+    </script>
+
     <div class="w-full max-w-7xl mx-auto py-6" x-data="pengaturanPage()" x-init="init()">
         <!-- Header -->
         <div class="bg-white rounded-2xl border border-[#C2C2C2] py-6 px-6 mb-6">
@@ -12,6 +18,16 @@
                     <p class="text-sm text-gray-500" x-text="currentDate"></p>
                     <img src="/assets/images/default-avatar.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" />
                 </div>
+            </div>
+        </div>
+
+        <!-- Firebase Connection Status -->
+        <div x-show="!isFirebaseConnected && !isFirebaseLoading" class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-4">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span>Menghubungkan ke Firebase...</span>
             </div>
         </div>
 
@@ -91,16 +107,23 @@
                         </div>
 
                         <p class="text-xs text-[#6B7280] italic mb-6">
-                            *Pastikan Anda sudah memeriksa kondisi lahan, agar tidak terjadi kelebihan maupun kekurangan air
+                            *Setting ini akan diterapkan ke semua sprayer di seluruh block. Pompa akan menyala otomatis ketika kelembaban di bawah batas kering (min) dan mati ketika di atas batas basah (max).
                         </p>
 
                         <!-- Buttons -->
                         <div class="flex gap-3">
                             <button type="button" 
-                                @click="saveKontrolIrigasi()"
-                                :disabled="!isEditing.kontrolIrigasi"
+                                @click="saveKontrolIrigasiToFirebase()"
+                                :disabled="!isEditing.kontrolIrigasi || isSaving"
                                 class="flex-1 btn-3d-green disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
-                                Simpan
+                                <span x-show="!isSaving">Simpan ke Firebase</span>
+                                <span x-show="isSaving" class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Menyimpan...
+                                </span>
                             </button>
                             <button type="button" 
                                 @click="resetKontrolIrigasiKelembaban()"
@@ -267,6 +290,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Success Modal -->
+        <x-global.success-notification 
+            x-show="showSuccess"
+            style="display: none;"
+            buttonText="Tutup"
+            @close="showSuccess = false"
+        />
+
+        <!-- Failed Modal -->
+        <x-global.failed-notification 
+            x-show="showFailed"
+            style="display: none;"
+            buttonText="Tutup"
+            @close="showFailed = false"
+        />
     </div>
 @endsection
 
@@ -347,6 +386,20 @@
             // Current date display
             currentDate: '',
             
+            // Firebase state
+            isFirebaseLoading: true,
+            isFirebaseConnected: false,
+            firebaseBlocks: [],
+            isSaving: false,
+            
+            // Modal state
+            showSuccess: false,
+            successTitle: 'Berhasil',
+            successMessage: 'Aksi berhasil dilakukan.',
+            showFailed: false,
+            failedTitle: 'Gagal',
+            failedMessage: 'Terjadi kesalahan. Silakan coba lagi.',
+            
             // Edit mode states
             isEditing: {
                 kontrolIrigasi: false,
@@ -356,8 +409,8 @@
             // Kontrol Irigasi settings
             kontrolIrigasi: {
                 kelembaban: {
-                    min: {{ $settings['kontrol_irigasi']['kelembaban_tanah']['min'] ?? 20 }},
-                    max: {{ $settings['kontrol_irigasi']['kelembaban_tanah']['max'] ?? 65 }}
+                    min: {{ $settings['kontrol_irigasi']['kelembaban_tanah']['min'] ?? 40 }},
+                    max: {{ $settings['kontrol_irigasi']['kelembaban_tanah']['max'] ?? 80 }}
                 },
                 kondisiLahan: {
                     activeTab: 'Kering',
@@ -379,17 +432,91 @@
             
             // Default values for reset
             defaults: {
-                kelembaban: { min: 20, max: 65 },
+                kelembaban: { min: 40, max: 80 },
                 kondisiLahan: { Kering: 20, Lembab: 50, Basah: 80 },
                 pengamanIrigasi: { min: 1, max: 3 }
             },
             
             // Initialize component
-            init() {
+            async init() {
+                // Set current date
                 const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                 const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                 const now = new Date();
                 this.currentDate = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+                
+                // Initialize Firebase
+                await this.initializeFirebase();
+            },
+            
+            async initializeFirebase() {
+                try {
+                    const modulePath = window.__FIREBASE_MODULE_PATH__;
+                    const config = window.__FIREBASE_CONFIG__;
+                    
+                    if (!config || !config.api_key) {
+                        console.error('Firebase config not found');
+                        this.isFirebaseLoading = false;
+                        return;
+                    }
+                    
+                    // Import the module
+                    await import(modulePath);
+                    
+                    const firebaseModule = window.FirebaseModule;
+                    
+                    if (!firebaseModule || typeof firebaseModule.initializeFirebase !== 'function') {
+                        console.error('Firebase module not loaded correctly');
+                        this.isFirebaseLoading = false;
+                        return;
+                    }
+                    
+                    // Initialize Firebase with config
+                    const firebaseConfig = {
+                        apiKey: config.api_key,
+                        authDomain: config.auth_domain,
+                        databaseURL: config.database_url,
+                        projectId: config.project_id,
+                        storageBucket: config.storage_bucket,
+                        messagingSenderId: config.messaging_sender_id,
+                        appId: config.app_id,
+                    };
+                    
+                    const db = firebaseModule.initializeFirebase(firebaseConfig);
+                    
+                    if (db) {
+                        this.isFirebaseConnected = true;
+                        window.FirebaseSettings = firebaseModule;
+                        
+                        // Listen to blocks to get current settings
+                        this.listenToBlocks();
+                    } else {
+                        console.error('Failed to initialize Firebase database');
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to initialize Firebase:', error);
+                } finally {
+                    this.isFirebaseLoading = false;
+                }
+            },
+            
+            listenToBlocks() {
+                window.FirebaseSettings.listenToMAOS((result) => {
+                    if (result.blocks && result.blocks.length > 0) {
+                        this.firebaseBlocks = result.blocks;
+                        
+                        // Load settings from first sprayer as default display
+                        const firstBlock = result.blocks[0];
+                        if (firstBlock && firstBlock.sprayers && firstBlock.sprayers.length > 0) {
+                            const firstSprayer = firstBlock.sprayers[0];
+                            if (firstSprayer.batasKering && firstSprayer.batasBasah) {
+                                this.kontrolIrigasi.kelembaban.min = firstSprayer.batasKering;
+                                this.kontrolIrigasi.kelembaban.max = firstSprayer.batasBasah;
+                            }
+                        }
+                    }
+                });
             },
             
             // Toggle edit mode
@@ -397,9 +524,61 @@
                 this.isEditing[section] = !this.isEditing[section];
             },
             
-            // Save Kontrol Irigasi
+            // Save Kontrol Irigasi to Firebase (all sprayers)
+            async saveKontrolIrigasiToFirebase() {
+                if (!this.isFirebaseConnected) {
+                    this.failedTitle = 'Firebase Tidak Terhubung';
+                    this.failedMessage = 'Firebase tidak terhubung. Silakan refresh halaman.';
+                    this.showFailed = true;
+                    return;
+                }
+                
+                this.isSaving = true;
+                
+                try {
+                    const batasBasah = this.kontrolIrigasi.kelembaban.max;
+                    const batasKering = this.kontrolIrigasi.kelembaban.min;
+                    
+                    let successCount = 0;
+                    let totalSprayers = 0;
+                    
+                    // Save to ALL sprayers in ALL blocks
+                    for (const block of this.firebaseBlocks) {
+                        for (const sprayer of block.sprayers) {
+                            totalSprayers++;
+                            const success = await window.FirebaseSettings.setIrrigationThresholds(
+                                block.name,
+                                sprayer.name,
+                                batasBasah,
+                                batasKering
+                            );
+                            if (success) successCount++;
+                        }
+                    }
+                    
+                    if (successCount === totalSprayers) {
+                        this.isEditing.kontrolIrigasi = false;
+                        this.successTitle = 'Berhasil Menyimpan Pengaturan';
+                        this.successMessage = `Berhasil menyimpan pengaturan ke ${successCount} sprayer!\n\nBatas Kering: ${batasKering}%\nBatas Basah: ${batasBasah}%`;
+                        this.showSuccess = true;
+                    } else {
+                        this.failedTitle = 'Sebagian Gagal Disimpan';
+                        this.failedMessage = `Tersimpan ke ${successCount}/${totalSprayers} sprayer. Beberapa sprayer gagal diupdate.`;
+                        this.showFailed = true;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error saving to Firebase:', error);
+                    this.failedTitle = 'Gagal Menyimpan';
+                    this.failedMessage = 'Terjadi kesalahan saat menyimpan: ' + error.message;
+                    this.showFailed = true;
+                } finally {
+                    this.isSaving = false;
+                }
+            },
+            
+            // Save Kontrol Irigasi (legacy - local only)
             saveKontrolIrigasi() {
-                // Data to send to backend
                 const payload = {
                     kelembaban_tanah: {
                         min: this.kontrolIrigasi.kelembaban.min,
@@ -415,17 +594,13 @@
                 console.log('Saving Kontrol Irigasi:', payload);
                 this.isEditing.kontrolIrigasi = false;
                 
-                // Show success notification
-                if (typeof window.dispatchEvent === 'function') {
-                    window.dispatchEvent(new CustomEvent('show-notification', {
-                        detail: { type: 'success', message: 'Pengaturan Kontrol Irigasi berhasil disimpan!' }
-                    }));
-                }
+                this.successTitle = 'Berhasil Menyimpan';
+                this.successMessage = 'Pengaturan Kontrol Irigasi berhasil disimpan!';
+                this.showSuccess = true;
             },
             
             // Save Safety Timeout
             saveSafetyTimeout() {
-                // Data to send to backend
                 const payload = {
                     pengaman_irigasi: {
                         min: this.safetyTimeout.pengaman.min,
@@ -436,12 +611,9 @@
                 console.log('Saving Safety Timeout:', payload);
                 this.isEditing.safetyTimeout = false;
                 
-                // Show success notification
-                if (typeof window.dispatchEvent === 'function') {
-                    window.dispatchEvent(new CustomEvent('show-notification', {
-                        detail: { type: 'success', message: 'Pengaturan Safety Timeout berhasil disimpan!' }
-                    }));
-                }
+                this.successTitle = 'Berhasil Menyimpan';
+                this.successMessage = 'Pengaturan Safety Timeout berhasil disimpan!';
+                this.showSuccess = true;
             },
             
             // Reset functions for Kontrol Irigasi

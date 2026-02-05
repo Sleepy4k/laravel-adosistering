@@ -12,27 +12,41 @@ class IrrigationSettingService extends Service
      */
     public function index(): array
     {
-        $settings = IrrigationSetting::query()
+        $dbSettings = IrrigationSetting::query()
             ->select('user_id', 'moisture_min', 'moisture_max', 'moisture_dry', 'moisture_normal', 'moisture_wet', 'safety_timeout_min', 'safety_timeout_max')
             ->where('user_id', auth('web')->id())
             ->first();
 
+        // If no settings exist, create default settings
+        if (!$dbSettings) {
+            $dbSettings = IrrigationSetting::create([
+                'user_id' => auth('web')->id(),
+                'moisture_min' => 40,
+                'moisture_max' => 80,
+                'moisture_dry' => 20,
+                'moisture_normal' => 50,
+                'moisture_wet' => 80,
+                'safety_timeout_min' => 1,
+                'safety_timeout_max' => 3,
+            ]);
+        }
+
         $settings = [
             'kontrol_irigasi' => [
                 'kelembaban_tanah' => [
-                    'min' => $settings->moisture_min,
-                    'max' => $settings->moisture_max,
+                    'min' => $dbSettings->moisture_min ?? 40,
+                    'max' => $dbSettings->moisture_max ?? 80,
                 ],
                 'kondisi_lahan' => [
-                    'kering' => $settings->moisture_dry,
-                    'lembab' => $settings->moisture_normal,
-                    'basah' => $settings->moisture_wet,
+                    'kering' => $dbSettings->moisture_dry ?? 20,
+                    'lembab' => $dbSettings->moisture_normal ?? 50,
+                    'basah' => $dbSettings->moisture_wet ?? 80,
                 ],
             ],
             'safety_timeout' => [
                 'pengaman_irigasi' => [
-                    'min' => $settings->safety_timeout_min,
-                    'max' => $settings->safety_timeout_max,
+                    'min' => $dbSettings->safety_timeout_min ?? 1,
+                    'max' => $dbSettings->safety_timeout_max ?? 3,
                 ],
             ],
         ];

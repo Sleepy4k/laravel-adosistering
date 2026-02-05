@@ -10,8 +10,8 @@
     Usage:
     <x-global.success-notification 
         x-show="showSuccess"
-        title="Berhasil Mengubah Data"
-        message="Data berhasil diubah dan disimpan."
+        :title="successTitle"
+        :message="successMessage"
         buttonText="Tutup"
         @close="showSuccess = false"
     />
@@ -20,6 +20,7 @@
 <div 
     {{ $attributes->merge(['class' => 'fixed inset-0 z-50 flex items-center justify-center bg-black/50']) }}
     x-cloak
+    @click.self="$dispatch('close')"
 >
     <div 
         x-transition:enter="transition ease-out duration-300"
@@ -29,11 +30,12 @@
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
         class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-8 relative text-center"
+        @click.stop
     >
         <!-- Close Button -->
         <button 
             @click="$dispatch('close')"
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
         >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -50,10 +52,10 @@
         </div>
 
         <!-- Title -->
-        <h3 class="text-xl font-bold text-[#4F4F4F] mb-2">{{ $title }}</h3>
+        <h3 class="text-xl font-bold text-[#4F4F4F] mb-2" x-text="successTitle"></h3>
         
         <!-- Message -->
-        <p class="text-sm text-gray-500 mb-6">{{ $message }}</p>
+        <p class="text-sm text-gray-500 mb-6 whitespace-pre-line" x-text="successMessage"></p>
 
         <!-- Button -->
         <button 

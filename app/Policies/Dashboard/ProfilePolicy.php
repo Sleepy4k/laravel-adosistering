@@ -19,6 +19,6 @@ class ProfilePolicy
      */
     public function update(User $user, string $profileType): bool
     {
-        return $user->can("profile.update.{$profileType}");
+        return $user->can("profile.edit.{$profileType}");
     }
 }

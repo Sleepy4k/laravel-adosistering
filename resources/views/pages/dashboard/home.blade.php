@@ -160,6 +160,31 @@
                         }
                     },
 
+                    /**
+                     * Toggle Irigasi Otomatis mode
+                     * Path: MAOS/{blockName}/{sprayerName}/control/mode
+                     * Value: 1 = ON (Otomatis), 0 = OFF (Manual)
+                     */
+                    async toggleAutoIrrigation(blockName, sprayerName, turnOn) {
+                        if (this.isSprayerLoading(blockName, sprayerName)) return;
+
+                        this.setSprayerLoading(blockName, sprayerName, true);
+
+                        try {
+                            const success = await window.FirebaseIoT.setIrrigationMode(blockName, sprayerName, turnOn);
+                            if (!success) {
+                                alert('Gagal mengubah mode irigasi otomatis');
+                            }
+                        } catch (error) {
+                            console.error('Error toggle auto irrigation:', error);
+                            alert('Error: ' + error.message);
+                        } finally {
+                            setTimeout(() => {
+                                this.setSprayerLoading(blockName, sprayerName, false);
+                            }, 500);
+                        }
+                    },
+
                     formatTimestamp(timestamp) {
                         if (!timestamp || timestamp === 0) {
                             return new Date().toLocaleString('id-ID');
@@ -224,9 +249,8 @@
             <div class="bg-white rounded-2xl border border-[#C2C2C2] py-4 px-4 mb-6">
                 <p class="text-sm text-gray-600 italic">
                     Irigasi Otomatis berarti menyalakan pompa berdasarkan kelembaban tanah secara otomatis. Batas kelembaban
-                    tanah dapat diatur pada menu <a href="#" class="underline">pengaturan</a>. Ketika irigasi otomatis
-                    diaktifkan, maka irigasi manual akan
-                    nonaktif.
+                    tanah dapat diatur pada menu <a href="{{ route('user.pengaturan') }}" class="underline text-primary-color font-medium">pengaturan</a>. Ketika irigasi otomatis
+                    diaktifkan, maka irigasi manual akan nonaktif.
                 </p>
             </div>
 
@@ -374,11 +398,30 @@
                                                 </button>
                                             </div>
                                             
-                                            {{-- Irigasi Otomatis Checkbox (Right Side) --}}
+                                            {{-- Irigasi Otomatis Toggle (Right Side) --}}
                                             <div class="flex items-center gap-3">
                                                 <span class="text-sm font-medium text-[#4F4F4F]">Irigasi Otomatis</span>
-                                                <input type="checkbox" class="checkbox-green" :checked="sprayer.autoIrrigation || false">
+                                                <button type="button" 
+                                                        @click="toggleAutoIrrigation(block.name, sprayer.name, !sprayer.autoIrrigation)"
+                                                        :disabled="isSprayerLoading(block.name, sprayer.name)"
+                                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                                                        :class="[
+                                                            sprayer.autoIrrigation ? 'bg-[#67B744]' : 'bg-gray-300',
+                                                            isSprayerLoading(block.name, sprayer.name) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                                        ]">
+                                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-md"
+                                                          :class="sprayer.autoIrrigation ? 'translate-x-6' : 'translate-x-1'"></span>
+                                                </button>
                                             </div>
+                                        </div>
+
+                                        {{-- Threshold Info (shown when auto irrigation is ON) --}}
+                                        <div x-show="sprayer.autoIrrigation" class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                            <p class="text-xs text-green-700">
+                                                <span class="font-semibold">Batas Otomatis:</span> 
+                                                Pompa ON saat kelembaban &lt; <span x-text="sprayer.batasKering" class="font-bold"></span>%, 
+                                                OFF saat &gt; <span x-text="sprayer.batasBasah" class="font-bold"></span>%
+                                            </p>
                                         </div>
                                     </div>
                                 </template>

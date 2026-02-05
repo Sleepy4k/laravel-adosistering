@@ -209,6 +209,75 @@ export async function setAutoIrrigation(sprayerId, isAuto) {
 }
 
 /**
+ * Control irrigation mode (Irigasi Otomatis)
+ * Path: MAOS/{BlockName}/{SprayerName}/control/mode
+ * @param {string} blockName - Block name (e.g., "Block_A")
+ * @param {string} sprayerName - Sprayer name (e.g., "Sprayer_1")
+ * @param {boolean} isAuto - Auto mode (true = 1, false = 0)
+ * @returns {Promise<boolean>} - Success status
+ */
+export async function setIrrigationMode(blockName, sprayerName, isAuto) {
+    const modeValue = isAuto ? 1 : 0; // Firebase expects 0 or 1 (number)
+    return await setData(`MAOS/${blockName}/${sprayerName}/control/mode`, modeValue);
+}
+
+/**
+ * Get irrigation mode status
+ * @param {string} blockName - Block name
+ * @param {string} sprayerName - Sprayer name
+ * @returns {Promise<number>} - Mode value (0 or 1)
+ */
+export async function getIrrigationMode(blockName, sprayerName) {
+    return await getData(`MAOS/${blockName}/${sprayerName}/control/mode`);
+}
+
+/**
+ * Set irrigation threshold settings (batas basah dan batas kering)
+ * Path: MAOS/{BlockName}/{SprayerName}/setting/
+ * @param {string} blockName - Block name (e.g., "Block_A")
+ * @param {string} sprayerName - Sprayer name (e.g., "Sprayer_1")
+ * @param {number} batasBasah - Upper threshold (wet limit)
+ * @param {number} batasKering - Lower threshold (dry limit)
+ * @returns {Promise<boolean>} - Success status
+ */
+export async function setIrrigationThresholds(blockName, sprayerName, batasBasah, batasKering) {
+    return await updateData(`MAOS/${blockName}/${sprayerName}/setting`, {
+        batas_basah: Number(batasBasah),
+        batas_kering: Number(batasKering)
+    });
+}
+
+/**
+ * Get irrigation threshold settings
+ * @param {string} blockName - Block name
+ * @param {string} sprayerName - Sprayer name
+ * @returns {Promise<Object>} - { batas_basah, batas_kering }
+ */
+export async function getIrrigationThresholds(blockName, sprayerName) {
+    return await getData(`MAOS/${blockName}/${sprayerName}/setting`);
+}
+
+/**
+ * Listen to irrigation mode changes
+ * @param {string} blockName - Block name
+ * @param {string} sprayerName - Sprayer name
+ * @param {Function} callback - Callback function
+ */
+export function listenToIrrigationMode(blockName, sprayerName, callback) {
+    return listenToData(`MAOS/${blockName}/${sprayerName}/control/mode`, callback);
+}
+
+/**
+ * Listen to irrigation threshold changes
+ * @param {string} blockName - Block name
+ * @param {string} sprayerName - Sprayer name
+ * @param {Function} callback - Callback function
+ */
+export function listenToIrrigationThresholds(blockName, sprayerName, callback) {
+    return listenToData(`MAOS/${blockName}/${sprayerName}/setting`, callback);
+}
+
+/**
  * Listen to entire MAOS structure for dynamic blocks and sprayers
  * @param {Function} callback - Callback with parsed blocks data
  */
@@ -220,26 +289,34 @@ export function listenToMAOS(callback) {
         }
 
         const blocks = [];
-
+        
         // Parse Firebase structure: MAOS/{BlockName}/{SprayerName}/...
         Object.keys(data).forEach(blockName => {
             const blockData = data[blockName];
             const sprayers = [];
-
+            
             // Get all sprayers in this block
             Object.keys(blockData).forEach(sprayerName => {
                 const sprayerData = blockData[sprayerName];
-
-                // Parse relay status: 0 = OFF, 1 = ON
+                
+                // Parse relay status: 0 = OFF, 1 = ON (number type)
                 const relayValue = sprayerData?.control?.relay;
                 const relayStatus = (relayValue === 1 || relayValue === '1') ? 'ON' : 'OFF';
-
+                
+                // Parse irrigation mode: 0 = Manual, 1 = Otomatis (number type)
+                const modeValue = sprayerData?.control?.mode;
+                const isAutoMode = (modeValue === 1 || modeValue === '1');
+                
+                // Parse irrigation thresholds from setting
+                const batasBasah = parseInt(sprayerData?.setting?.batas_basah) || 80;
+                const batasKering = parseInt(sprayerData?.setting?.batas_kering) || 40;
+                
                 // Parse numeric values from Firebase (handle string or number)
-                const moisture = parseFloat(sprayerData?.data?.moisture_percent || 0);
-                const flowRate = parseFloat(sprayerData?.data?.flow_Lmin || 0);
-                const totalVolume = parseFloat(sprayerData?.data?.totalVolume_L || 0);
+                const moisture = parseFloat(sprayerData?.data?.moisture_percent || sprayerData?.data?.moisture || 0);
+                const flowRate = parseFloat(sprayerData?.data?.flow_Lmin || sprayerData?.data?.flowRate || 0);
+                const totalVolume = parseFloat(sprayerData?.data?.totalVolume_L || sprayerData?.data?.totalVolume || 0);
                 const moistureStatus = sprayerData?.data?.moisture_status || 'Kering';
-
+                
                 sprayers.push({
                     name: sprayerName,
                     relay: relayStatus,
@@ -253,34 +330,36 @@ export function listenToMAOS(callback) {
                     kecepatanMps: parseFloat(sprayerData?.data?.kecepatan_mps || 0),
                     flowMls: parseFloat(sprayerData?.data?.flow_mLs || 0),
                     sensorConnected: sprayerData?.data?.sensor_connected !== false,
-                    autoIrrigation: sprayerData?.control?.autoIrrigation || false,
+                    autoIrrigation: isAutoMode,     // From control/mode
+                    batasBasah: batasBasah,          // From setting/batas_basah
+                    batasKering: batasKering,        // From setting/batas_kering
                 });
             });
-
+            
             // Calculate block averages
             const sprayerCount = sprayers.length || 1;
-
+            
             // Average moisture percentage
             const avgMoisture = sprayers.reduce((sum, s) => sum + s.moisture, 0) / sprayerCount;
-
+            
             // Average flow rate (L/min)
             const avgFlowRate = sprayers.reduce((sum, s) => sum + s.flowRate, 0) / sprayerCount;
-
+            
             // Total volume from all sprayers (L)
             const totalVolume = sprayers.reduce((sum, s) => sum + s.totalVolume, 0);
-
+            
             // Calculate moisture status badge for block
             // Count how many sprayers are "Lembab" vs "Kering"
-            const lembabCount = sprayers.filter(s =>
+            const lembabCount = sprayers.filter(s => 
                 s.moistureStatus === 'Lembab' || s.moisture >= 60
             ).length;
-            const keringCount = sprayers.filter(s =>
+            const keringCount = sprayers.filter(s => 
                 s.moistureStatus === 'Kering' || s.moisture < 60
             ).length;
-
+            
             // Majority rule: if more than half are lembab, show "Lembab", otherwise "Kering"
             const blockMoistureStatus = lembabCount > keringCount ? 'Lembab' : 'Kering';
-
+            
             blocks.push({
                 name: blockName,
                 sprayers: sprayers,
@@ -290,10 +369,10 @@ export function listenToMAOS(callback) {
                 moistureStatus: blockMoistureStatus,
             });
         });
-
+        
         // Sort blocks by name
         blocks.sort((a, b) => a.name.localeCompare(b.name));
-
+        
         callback({ blocks });
     });
 }
@@ -313,6 +392,12 @@ const FirebaseModule = {
     getRelayStatus,
     listenToRelay,
     setAutoIrrigation,
+    setIrrigationMode,
+    getIrrigationMode,
+    setIrrigationThresholds,
+    getIrrigationThresholds,
+    listenToIrrigationMode,
+    listenToIrrigationThresholds,
     listenToMAOS,
 };
 

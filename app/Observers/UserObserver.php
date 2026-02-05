@@ -14,7 +14,9 @@ class UserObserver
     public function updated(User $user): void
     {
         if ($user->wasChanged('password')) {
-            Notification::sendNow($user, new PasswordChanged($user->personal->full_name, $user->email));
+            // Use name from user model, since details->full_name may not exist
+            $fullName = $user->name ?? 'User';
+            Notification::sendNow($user, new PasswordChanged($fullName, $user->email));
         }
     }
 }

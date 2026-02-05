@@ -30,6 +30,13 @@
                 isLoading: true,
                 currentPeriod: window.__CURRENT_PERIOD__ || 'today',
                 
+                // Smoothing feature state
+                useSmoothing: false,
+                isSmoothingLoading: false,
+                smoothedCache: {},
+                rawLogs: {}, // Store raw numeric logs per block for smoothing (from MySQL backend - not ready yet)
+                noNumericHistory: false, // Flag if no numeric history available (set to false to enable smoothing button)
+                
                 // Firebase data
                 firebaseBlocks: [],
                 historyData: [], // Store history data for frequency calculation
@@ -141,45 +148,46 @@
                             
                             // Loop through sprayers: Block_A -> Sprayer_1, Sprayer_2, etc
                             Object.keys(blockData).forEach(sprayerName => {
-                                // Skip non-sprayer keys (control, data, etc)
+                                // Skip non-sprayer keys
                                 if (!sprayerName.includes('Sprayer')) return;
                                 
                                 const sprayerData = blockData[sprayerName];
-                                if (!sprayerData || !sprayerData.history) return;
+                                if (!sprayerData) return;
                                 
-                                // Loop through history dates: Sprayer_1 -> history -> 01-02-2026, 02-02-2026, etc
-                                Object.keys(sprayerData.history).forEach(dateKey => {
-                                    const dateData = sprayerData.history[dateKey];
-                                    if (!dateData || typeof dateData !== 'object') return;
-                                    
-                                    // Count unique IDs for this date
-                                    const uniqueIds = Object.keys(dateData);
-                                    
-                                    // Loop through each unique ID: 01-02-2026 -> -OkNNb3Axdpd0D0C9EYc, -OkNNpnnI4S8WXtuCsGy, etc
-                                    uniqueIds.forEach(uniqueId => {
-                                        const entry = dateData[uniqueId];
-                                        if (!entry || typeof entry !== 'object') return;
+                                // ==========================================
+                                // ONLY get history data for irrigation frequency calculation
+                                // Chart data comes from realtime (firebaseBlocks)
+                                // ==========================================
+                                if (sprayerData.history && typeof sprayerData.history === 'object') {
+                                    // Loop through history dates
+                                    Object.keys(sprayerData.history).forEach(dateKey => {
+                                        const dateData = sprayerData.history[dateKey];
+                                        if (!dateData || typeof dateData !== 'object') return;
                                         
-                                        // Use entry.timestamp if exists, otherwise use dateKey
-                                        const timestamp = entry.timestamp || dateKey;
+                                        const uniqueIds = Object.keys(dateData);
                                         
-                                        // Each unique ID = 1 irrigation event
-                                        historyEntries.push({
-                                            blockName: blockName,
-                                            sprayerName: sprayerName,
-                                            date: dateKey,
-                                            uniqueId: uniqueId,
-                                            timestamp: timestamp,
-                                            jenisIrigasi: entry.jenisIrigasi || 'Otomatis' // Default karena belum ada field di Firebase
+                                        uniqueIds.forEach(uniqueId => {
+                                            const entry = dateData[uniqueId];
+                                            if (!entry || typeof entry !== 'object') return;
+                                            
+                                            const timestamp = entry.timestamp || dateKey;
+                                            
+                                            // Each unique ID = 1 irrigation event (for frequency count)
+                                            historyEntries.push({
+                                                blockName: blockName,
+                                                sprayerName: sprayerName,
+                                                date: dateKey,
+                                                uniqueId: uniqueId,
+                                                timestamp: timestamp,
+                                                jenisIrigasi: entry.jenisIrigasi || 'Otomatis'
+                                            });
                                         });
                                     });
-                                });
+                                }
                             });
                         });
                         
-                        this.historyData = historyEntries;
-                        
-                        // Reprocess statistics with history data
+                        this.historyData = historyEntries;// Reprocess statistics with history data (for frequency calculation)
                         if (this.firebaseBlocks.length > 0) {
                             this.processStatisticsData();
                         }
@@ -341,31 +349,74 @@
                 
                 generateChartData(block) {
                     const now = new Date();
+                    const currentMoisture = block.avgMoisture || 0;
+                    const currentVolume = block.totalVolume || 0;
+                    const hasRealData = currentMoisture > 0 || currentVolume > 0;
+
+                    // Check cache first
+                    const cacheKey = this.getCacheKey(block.name, this.useSmoothing);
+                    if (this.smoothedCache[cacheKey]) {
+                        return this.smoothedCache[cacheKey];
+                    }
+
+                    // If smoothing is enabled and we have raw logs from MySQL backend
+                    if (this.useSmoothing && this.rawLogs[block.name] && this.rawLogs[block.name].length > 0) {
+                        const aggregated = this.aggregateByPeriod(this.rawLogs[block.name], this.currentPeriod);
+
+                        if (aggregated.labels.length > 0) {
+                            const window = this.getSmoothingWindow();
+                            const kelembabanData = this.smoothMovingAverage(aggregated.moistureValues, window);
+                            const penggunaanAirData = this.smoothMovingAverage(aggregated.volumeValues, window);
+
+                            const result = {
+                                kelembaban: aggregated.labels.map((waktu, idx) => ({
+                                    waktu: waktu,
+                                    nilai: kelembabanData[idx]
+                                })),
+                                penggunaanAir: aggregated.labels.map((waktu, idx) => ({
+                                    waktu: waktu,
+                                    nilai: penggunaanAirData[idx]
+                                }))
+                            };
+
+                            this.smoothedCache[cacheKey] = result;
+                            return result;
+                        }
+                    }
+
+                    // Generate chart data from realtime Firebase data
+                    return this.generateRawChartData(block, now, currentMoisture, currentVolume, hasRealData);
+                },
+                
+                /**
+                 * Generate raw chart data from realtime Firebase data
+                 * Chart should display only realtime data (not history)
+                 */
+                generateRawChartData(block, now, currentMoisture, currentVolume, hasRealData) {
                     let labels = [];
                     let kelembabanData = [];
                     let penggunaanAirData = [];
                     
-                    // Get current real values from block (NO SIMULATION)
-                    const currentMoisture = block.avgMoisture || 0;
-                    const currentVolume = block.totalVolume || 0;
-                    const avgFlowRate = block.avgFlowRate || 0;
-                    
-                    // Check if we have real data (not just zeros)
-                    const hasRealData = currentMoisture > 0 || currentVolume > 0;
-                    
                     if (this.currentPeriod === 'today') {
-                        // Per jam untuk hari ini (24 jam) - DATA MENTAH
+                        // Per jam untuk hari ini (24 jam)
                         const currentHour = now.getHours();
+                        
+                        // Create hourly labels
                         for (let i = 0; i <= currentHour; i += 2) {
                             const hour = i.toString().padStart(2, '0') + ':00';
                             labels.push(hour);
                             
-                            // Only add data if we have real data, otherwise null (chart won't draw)
-                            kelembabanData.push(hasRealData ? currentMoisture : null);
-                            penggunaanAirData.push(hasRealData ? currentVolume : null);
+                            // All hours show current realtime data (since we don't have historical data yet)
+                            if (hasRealData) {
+                                kelembabanData.push(currentMoisture);
+                                penggunaanAirData.push(currentVolume);
+                            } else {
+                                kelembabanData.push(null);
+                                penggunaanAirData.push(null);
+                            }
                         }
                     } else if (this.currentPeriod === '7days') {
-                        // Per hari untuk 7 hari terakhir - DATA MENTAH
+                        // Per hari untuk 7 hari terakhir
                         const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
                         for (let i = 6; i >= 0; i--) {
                             const date = new Date(now);
@@ -373,35 +424,36 @@
                             const dayName = days[date.getDay()];
                             labels.push(dayName);
                             
-                            // Only add data for today if we have real data
+                            // Only today (i === 0) gets the realtime data
                             if (i === 0 && hasRealData) {
                                 kelembabanData.push(currentMoisture);
                                 penggunaanAirData.push(currentVolume);
                             } else {
-                                // No data for past days - use null so chart won't draw
+                                // No data for past days
                                 kelembabanData.push(null);
                                 penggunaanAirData.push(null);
                             }
                         }
                     } else if (this.currentPeriod === '30days') {
-                        // Per minggu untuk 30 hari terakhir - DATA MENTAH
-                        for (let i = 4; i >= 0; i--) {
-                            const weekLabel = 'Minggu ' + (5 - i);
+                        // Per minggu untuk 30 hari terakhir (4 minggu)
+                        for (let i = 3; i >= 0; i--) {
+                            const weekLabel = 'Minggu ' + (4 - i);
                             labels.push(weekLabel);
                             
-                            // Only add data for current week if we have real data
+                            // Only current week (i === 0) gets the realtime data
                             if (i === 0 && hasRealData) {
                                 kelembabanData.push(currentMoisture);
                                 penggunaanAirData.push(currentVolume);
                             } else {
-                                // No data for past weeks - use null so chart won't draw
+                                // No data for past weeks
                                 kelembabanData.push(null);
                                 penggunaanAirData.push(null);
                             }
                         }
                     }
                     
-                    return {
+                    const cacheKey = this.getCacheKey(block.name, false);
+                    const result = {
                         kelembaban: labels.map((waktu, idx) => ({
                             waktu: waktu,
                             nilai: kelembabanData[idx]
@@ -411,95 +463,281 @@
                             nilai: penggunaanAirData[idx]
                         }))
                     };
+                    
+                    // Cache the result
+                    this.smoothedCache[cacheKey] = result;return result;
                 },
                 
                 async initializeCharts() {
-                    // Prevent multiple simultaneous initialization
-                    if (this.chartsInitializing) {
-                        return;
-                    }
-                    
-                    if (this.chartsLoaded) {
-                        return;
-                    }
-                    
-                    if (this.bloks.length === 0) {
-                        return;
-                    }
-                    
-                    this.chartsInitializing = true;
-                    
+                    if (this.chartsInitializing || this.bloks.length === 0) {return;
+                    }this.chartsInitializing = true;
+
                     try {
-                        // First, destroy ALL existing Chart.js instances globally
-                        this.destroyAllCharts();
-                        
-                        // Wait a bit for cleanup
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                        
-                        const chartLoaderPath = window.__CHART_LOADER_PATH__;
-                        
-                        // Import the chart module
-                        await import(chartLoaderPath);
+                        // Load Chart.js first if not loaded
+                        const chartLoaderPath = window.__CHART_LOADER_PATH__;await import(chartLoaderPath);
                         
                         const chartModule = window.ChartModule;
                         
-                        if (chartModule && typeof chartModule.initializeCharts === 'function') {
-                            chartModule.initializeCharts(this.bloks);
-                            this.chartsLoaded = true;
+                        // Destroy existing charts using ChartModule (guaranteed to have Chart access)
+                        if (chartModule && typeof chartModule.destroyAllCharts === 'function') {
+                            chartModule.destroyAllCharts(this.bloks);
                         }
+
+                        // Wait to ensure cleanup is complete
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                        if (chartModule && typeof chartModule.initializeCharts === 'function') {chartModule.initializeCharts(this.bloks);
+                            this.chartsLoaded = true;}
                     } catch (error) {
-                        console.error('Failed to load charts:', error);
+                        console.error('❌ Failed to load charts:', error);
                     } finally {
                         this.chartsInitializing = false;
                     }
                 },
                 
-                destroyAllCharts() {
-                    try {
-                        // Method 1: Destroy by canvas ID
+                destroyAllCharts() {try {
+                        // Use ChartModule.destroyAllCharts if available (preferred method)
+                        const chartModule = window.ChartModule;
+                        if (chartModule && typeof chartModule.destroyAllCharts === 'function') {
+                            chartModule.destroyAllCharts(this.bloks);
+                            this.chartInstances = {};
+                            this.chartsLoaded = false;
+                            return;
+                        }
+                        
+                        // Fallback: Check if Chart.js is loaded via window.Chart
+                        if (typeof window.Chart === 'undefined') {this.chartInstances = {};
+                            this.chartsLoaded = false;
+                            return;
+                        }
+                        
+                        // Method 1: Destroy by canvas ID using Chart.getChart
                         if (this.bloks && this.bloks.length > 0) {
                             this.bloks.forEach(blok => {
-                                const canvasIds = [
-                                    'chartKelembaban' + blok.id,
-                                    'chartPenggunaanAir' + blok.id
-                                ];
-                                
-                                canvasIds.forEach(canvasId => {
+                                ['chartKelembaban' + blok.id, 'chartPenggunaanAir' + blok.id].forEach(canvasId => {
                                     const canvas = document.getElementById(canvasId);
-                                    if (canvas && typeof Chart !== 'undefined') {
-                                        const existingChart = Chart.getChart(canvas);
-                                        if (existingChart) {
-                                            existingChart.destroy();
-                                        }
+                                    if (canvas) {
+                                        try {
+                                            const chart = window.Chart.getChart(canvas);
+                                            if (chart) {chart.destroy();
+                                            }
+                                        } catch (e) {}
                                     }
                                 });
                             });
-                        }
-                        
-                        // Method 2: Destroy all Chart.js instances globally
-                        if (typeof Chart !== 'undefined' && Chart.instances) {
-                            Object.keys(Chart.instances).forEach(key => {
-                                const chart = Chart.instances[key];
-                                if (chart) {
-                                    chart.destroy();
-                                }
-                            });
-                        }
-                        
-                        // Method 3: Use Chart.helpers if available
-                        if (typeof Chart !== 'undefined' && Chart.helpers && Chart.helpers.each) {
-                            Chart.helpers.each(Chart.instances, function(instance) {
-                                if (instance) {
-                                    instance.destroy();
-                                }
-                            });
-                        }
-                        
+                        }} catch (error) {
+                        console.error('⚠️ Error destroying charts:', error);
+                    }
+
+                    this.chartInstances = {};
+                    this.chartsLoaded = false;
+                },
+                
+                // ========================================
+                // SMOOTHING FUNCTIONS
+                // ========================================
+                
+                /**
+                 * Toggle smoothing mode and regenerate charts
+                 */
+                async toggleSmoothing() {
+                    // If trying to enable smoothing but no numeric history, show alert and prevent
+                    if (!this.useSmoothing && this.noNumericHistory) {
+                        alert('Tidak ada data history numerik untuk mode Smoothing. Silakan gunakan mode Data Mentah.');
+                        return;
+                    }this.isSmoothingLoading = true;
+
+                    try {
+                        // Toggle the smoothing state
+                        this.useSmoothing = !this.useSmoothing;
+
+                        // IMPORTANT: Clear cache to force regenerationthis.smoothedCache = {};
+
+                        // Reset chart states BEFORE destroying
+                        this.chartsLoaded = false;
+                        this.chartsInitializing = false;
+
+                        // Wait a bit before reprocessing
+                        await new Promise(resolve => setTimeout(resolve, 50));this.processStatisticsData();
                     } catch (error) {
-                        console.error('Error destroying charts:', error);
+                        console.error('Error toggling smoothing:', error);
+                    } finally {
+                        this.isSmoothingLoading = false;
+                    }
+                },
+                
+                /**
+                 * Moving Average Smoothing
+                 * @param {Array} arr - Array of numbers (can contain null)
+                 * @param {Number} window - Window size for moving average
+                 * @returns {Array} - Smoothed array
+                 */
+                smoothMovingAverage(arr, window = 5) {const out = new Array(arr.length).fill(null);
+                    const sanitized = arr.map(v => (v === undefined || v === null || isNaN(v)) ? null : parseFloat(v));
+
+                    for (let i = 0; i < sanitized.length; i++) {
+                        const start = Math.max(0, i - window + 1);
+                        const slice = sanitized.slice(start, i + 1).filter(v => v !== null);
+                        if (slice.length === 0) continue;
+                        out[i] = slice.reduce((a, b) => a + b, 0) / slice.length;
+                    }return out;
+                },
+                
+                /**
+                 * Aggregate raw logs by period (today/7days/30days)
+                 * @param {Array} rawLogs - Array of log entries with ts, moisture, flow, volume
+                 * @param {String} period - 'today', '7days', '30days'
+                 * @returns {Object} - { labels, moistureValues, volumeValues }
+                 */
+                aggregateByPeriod(rawLogs, period) {
+                    const now = new Date();
+                    const result = { labels: [], moistureValues: [], volumeValues: [] };if (!rawLogs || rawLogs.length === 0) {return result;
                     }
                     
-                    this.chartInstances = {};
+                    // Filter logs by period
+                    let startDate;
+                    if (period === 'today') {
+                        startDate = new Date(now);
+                        startDate.setHours(0, 0, 0, 0);
+                    } else if (period === '7days') {
+                        startDate = new Date(now);
+                        startDate.setDate(startDate.getDate() - 7);
+                        startDate.setHours(0, 0, 0, 0);
+                    } else if (period === '30days') {
+                        startDate = new Date(now);
+                        startDate.setDate(startDate.getDate() - 30);
+                        startDate.setHours(0, 0, 0, 0);
+                    }
+                    
+                    const filteredLogs = rawLogs.filter(log => log.ts >= startDate.getTime());if (period === 'today') {
+                        // Aggregate per hour (0-23)
+                        const hourlyBuckets = {};
+                        for (let h = 0; h <= now.getHours(); h += 2) {
+                            hourlyBuckets[h] = { moisture: [], volume: [] };
+                        }
+                        
+                        filteredLogs.forEach(log => {
+                            const logDate = new Date(log.ts);
+                            const hour = Math.floor(logDate.getHours() / 2) * 2; // Round to even hours
+                            if (hourlyBuckets[hour]) {
+                                if (log.moisture !== null) hourlyBuckets[hour].moisture.push(log.moisture);
+                                if (log.volume !== null) hourlyBuckets[hour].volume.push(log.volume);
+                            }
+                        });
+                        
+                        Object.keys(hourlyBuckets).sort((a, b) => a - b).forEach(hour => {
+                            const bucket = hourlyBuckets[hour];
+                            result.labels.push(hour.toString().padStart(2, '0') + ':00');
+                            result.moistureValues.push(
+                                bucket.moisture.length > 0 
+                                    ? bucket.moisture.reduce((a, b) => a + b, 0) / bucket.moisture.length 
+                                    : null
+                            );
+                            result.volumeValues.push(
+                                bucket.volume.length > 0 
+                                    ? bucket.volume.reduce((a, b) => a + b, 0) / bucket.volume.length 
+                                    : null
+                            );
+                        });
+                        
+                    } else if (period === '7days') {
+                        // Aggregate per day
+                        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+                        const dailyBuckets = {};
+                        
+                        for (let i = 6; i >= 0; i--) {
+                            const date = new Date(now);
+                            date.setDate(date.getDate() - i);
+                            const dateKey = date.toISOString().split('T')[0];
+                            dailyBuckets[dateKey] = { 
+                                dayName: days[date.getDay()], 
+                                moisture: [], 
+                                volume: [] 
+                            };
+                        }
+                        
+                        filteredLogs.forEach(log => {
+                            const logDate = new Date(log.ts);
+                            const dateKey = logDate.toISOString().split('T')[0];
+                            if (dailyBuckets[dateKey]) {
+                                if (log.moisture !== null) dailyBuckets[dateKey].moisture.push(log.moisture);
+                                if (log.volume !== null) dailyBuckets[dateKey].volume.push(log.volume);
+                            }
+                        });
+                        
+                        Object.keys(dailyBuckets).sort().forEach(dateKey => {
+                            const bucket = dailyBuckets[dateKey];
+                            result.labels.push(bucket.dayName);
+                            result.moistureValues.push(
+                                bucket.moisture.length > 0 
+                                    ? bucket.moisture.reduce((a, b) => a + b, 0) / bucket.moisture.length 
+                                    : null
+                            );
+                            result.volumeValues.push(
+                                bucket.volume.length > 0 
+                                    ? bucket.volume.reduce((a, b) => a + b, 0) / bucket.volume.length 
+                                    : null
+                            );
+                        });
+                        
+                    } else if (period === '30days') {
+                        // Aggregate per week (4 minggu untuk 30 hari)
+                        const weeklyBuckets = {};
+                        for (let w = 3; w >= 0; w--) {
+                            weeklyBuckets[w] = { moisture: [], volume: [] };
+                        }
+                        
+                        filteredLogs.forEach(log => {
+                            const logDate = new Date(log.ts);
+                            const daysDiff = Math.floor((now.getTime() - logDate.getTime()) / (1000 * 60 * 60 * 24));
+                            const weekIndex = Math.min(3, Math.floor(daysDiff / 7));
+                            if (weeklyBuckets[weekIndex]) {
+                                if (log.moisture !== null) weeklyBuckets[weekIndex].moisture.push(log.moisture);
+                                if (log.volume !== null) weeklyBuckets[weekIndex].volume.push(log.volume);
+                            }
+                        });
+                        
+                        // Reverse to show oldest first
+                        [3, 2, 1, 0].forEach(w => {
+                            const bucket = weeklyBuckets[w];
+                            result.labels.push('Minggu ' + (4 - w));
+                            result.moistureValues.push(
+                                bucket.moisture.length > 0 
+                                    ? bucket.moisture.reduce((a, b) => a + b, 0) / bucket.moisture.length 
+                                    : null
+                            );
+                            result.volumeValues.push(
+                                bucket.volume.length > 0 
+                                    ? bucket.volume.reduce((a, b) => a + b, 0) / bucket.volume.length 
+                                    : null
+                            );
+                        });
+                    }
+                    
+                    return result;
+                },
+                
+                /**
+                 * Get cache key for smoothed data
+                 */
+                getCacheKey(blockName, isSmoothed) {
+                    return `${blockName}::${this.currentPeriod}::${isSmoothed ? 'sm' : 'raw'}`;
+                },
+                
+                /**
+                 * Get smoothing window based on period
+                 */
+                getSmoothingWindow() {
+                    switch (this.currentPeriod) {
+                        case 'today':
+                            return 5;
+                        case '7days':
+                            return 4;
+                        case '30days':
+                            return 3;
+                        default:
+                            return 5;
+                    }
                 },
                 
                 formatNumber(value, decimals = 2) {
@@ -540,19 +778,87 @@
 
         <!-- Period Filter Tabs -->
         <div class="bg-white rounded-2xl border border-[#C2C2C2] py-4 px-6 mb-6">
-            <div class="flex items-center justify-center gap-6">
-                <a href="{{ route('user.statistik', ['period' => 'today']) }}" 
-                   class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === 'today' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
-                    Hari Ini
-                </a>
-                <a href="{{ route('user.statistik', ['period' => '7days']) }}" 
-                   class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === '7days' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
-                    7 Hari Terakhir
-                </a>
-                <a href="{{ route('user.statistik', ['period' => '30days']) }}" 
-                   class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === '30days' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
-                    30 Hari Terakhir
-                </a>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <!-- Period Tabs -->
+                <div class="flex items-center justify-center gap-6">
+                    <a href="{{ route('user.statistik', ['period' => 'today']) }}" 
+                       class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === 'today' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
+                        Hari Ini
+                    </a>
+                    <a href="{{ route('user.statistik', ['period' => '7days']) }}" 
+                       class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === '7days' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
+                        7 Hari Terakhir
+                    </a>
+                    <a href="{{ route('user.statistik', ['period' => '30days']) }}" 
+                       class="relative px-4 py-2 text-sm font-medium transition-colors {{ $currentPeriod === '30days' ? 'text-[#67B744] underline underline-offset-8 decoration-2 decoration-[#67B744]' : 'text-gray-500 hover:text-gray-700' }}">
+                        30 Hari Terakhir
+                    </a>
+                </div>
+                
+                <!-- Data Mode Toggle (Raw / Smoothed) -->
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-500">Mode Data:</span>
+                    
+                    <!-- Toggle Switch Style Button -->
+                    <div class="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                        <!-- Raw Button -->
+                        <button 
+                            type="button"
+                            x-on:click="if(useSmoothing) { toggleSmoothing(); }"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer"
+                            :class="!useSmoothing 
+                                ? 'bg-white text-[#67B744] shadow-sm border border-[#67B744]' 
+                                : 'bg-transparent text-gray-500 hover:text-gray-700'"
+                        >
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Data Mentah
+                            </span>
+                        </button>
+                        
+                        <!-- Smoothed Button -->
+                        <button 
+                            type="button"
+                            x-on:click="if(!useSmoothing && !noNumericHistory) { toggleSmoothing(); }"
+                            :disabled="noNumericHistory"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                            :class="[
+                                noNumericHistory 
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                                    : useSmoothing 
+                                        ? 'bg-[#67B744] text-white shadow-sm cursor-pointer' 
+                                        : 'bg-transparent text-gray-500 hover:text-gray-700 cursor-pointer'
+                            ]"
+                        >
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                                </svg>
+                                Smoothing
+                            </span>
+                        </button>
+                    </div>
+                    
+                    <!-- Loading indicator -->
+                    <div x-show="isSmoothingLoading" class="flex items-center" style="display: none;">
+                        <svg class="animate-spin h-5 w-5 text-[#67B744]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    
+                    <!-- Warning if no numeric history (MySQL backend not ready) -->
+                    <div x-show="noNumericHistory" 
+                         class="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded-lg"
+                         style="display: none;">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-xs text-blue-700">Realtime data only</span>
+                    </div>
+                </div>
             </div>
         </div>
 

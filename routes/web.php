@@ -47,12 +47,20 @@ Route::middleware('auth')->group(function () {
     Route::resource('profile', Dashboard\ProfileController::class)
         ->only(['index', 'update'])
         ->parameters(['profile' => 'profileType']);
+    
+    Route::post('profile/validate-password', [Dashboard\ProfileController::class, 'validateCurrentPassword'])
+        ->name('profile.validate-password');
 
     Route::get('/irrigation-history', Dashboard\IrrigationHistoryController::class)->name('irrigation-history');
 
     Route::get('/statistik', Dashboard\StatistikController::class)->name('user.statistik');
+    
+    // Testing route (only for development)
+    if (config('app.debug')) {
+        Route::get('/statistik-testing', Dashboard\StatistikTestingController::class)->name('user.statistik.testing');
+    }
 
-    Route::get('/notifications', Dashboard\NotificationController::class)->name('user.notifications');
+    // Route::get('/notifications', Dashboard\NotificationController::class)->name('user.notifications');
 
     Route::resource('pengaturan', Dashboard\IrrigationSettingController::class)
         ->only(['index', 'update'])

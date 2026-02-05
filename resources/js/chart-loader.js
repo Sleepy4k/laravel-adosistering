@@ -35,7 +35,6 @@ Chart.register(
  */
 export function initializeCharts(bloksData) {
     if (!bloksData || !Array.isArray(bloksData)) {
-        console.warn('Chart data not provided or invalid');
         return;
     }
 
@@ -112,6 +111,34 @@ function createKelembabanChart(blok) {
 }
 
 /**
+ * Destroy all existing charts
+ * @param {Array} bloksData - Array of blok data to get canvas IDs
+ */
+export function destroyAllCharts(bloksData) {
+    if (!bloksData || !Array.isArray(bloksData)) {
+        // Try to destroy by checking all canvases
+        document.querySelectorAll('canvas[id^="chartKelembaban"], canvas[id^="chartPenggunaanAir"]').forEach(canvas => {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        });
+    } else {
+        bloksData.forEach(blok => {
+            ['chartKelembaban' + blok.id, 'chartPenggunaanAir' + blok.id].forEach(canvasId => {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    const existingChart = Chart.getChart(canvas);
+                    if (existingChart) {
+                        existingChart.destroy();
+                    }
+                }
+            });
+        });
+    }
+}
+
+/**
  * Create water usage chart
  */
 function createPenggunaanAirChart(blok) {
@@ -178,7 +205,8 @@ function createPenggunaanAirChart(blok) {
 
 // Expose to window for browser dynamic import compatibility
 if (typeof window !== 'undefined') {
-    window.ChartModule = { initializeCharts };
+    window.ChartModule = { initializeCharts, destroyAllCharts };
+    window.Chart = Chart; // Expose Chart class for destroy operations
 }
 
-export default { initializeCharts };
+export default { initializeCharts, destroyAllCharts };
