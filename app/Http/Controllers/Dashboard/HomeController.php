@@ -27,10 +27,15 @@ class HomeController extends Controller
 
     /**
      * Handle the incoming request.
+     * Display role-specific dashboard based on user's role.
      */
     public function __invoke(Request $request)
     {
-        return view('pages.dashboard.home', $this->service->invoke());
+        $user = $request->user();
+        $role = $user->getRoleNames()->first() ?? config('rbac.role.default', 'user');
+
+        // Render role-specific view
+        return view("pages.dashboard.home.{$role}", $this->service->invoke());
     }
 
     /**

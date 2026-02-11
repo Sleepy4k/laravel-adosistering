@@ -8,6 +8,12 @@ import collapse from '@alpinejs/collapse';
 // Removed eager import to reduce initial bundle size by ~140KB
 // Use: import('./firebase') in specific pages that need Firebase
 
+// Import Alpine component definitions (attaches to window before Alpine.start)
+import './components/iot-dashboard';
+import './components/superadmin-dashboard';
+import './components/irrigation-history';
+import './components/statistik-page';
+
 // Register Alpine plugins
 Alpine.plugin(collapse);
 

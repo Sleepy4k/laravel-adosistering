@@ -116,7 +116,7 @@
                                 @click="saveKontrolIrigasiToFirebase()"
                                 :disabled="!isEditing.kontrolIrigasi || isSaving"
                                 class="flex-1 btn-3d-green disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
-                                <span x-show="!isSaving">Simpan ke Firebase</span>
+                                <span x-show="!isSaving">Simpan</span>
                                 <span x-show="isSaving" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
